@@ -9,7 +9,7 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest,
     TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
@@ -416,6 +416,21 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
     except Exception as e:
         logger.error(f"Error in email summary generator: {str(e)}")
         return handle_api_error(e)
+    
+@app.post("/send-email")
+async def send_email_api(email_request: EmailRequest):
+    try:
+        await send_email(
+            subject=email_request.subject,
+            body=email_request.body,
+            reciever=email_request.recipient
+        )
+        return JSONResponse(
+            content={"message": "Email sent successfully"},
+            status_code=200
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
 
 @app.get("/models")
 async def get_models():

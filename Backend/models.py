@@ -19,6 +19,11 @@ class UserLogin(BaseModel):
     email:str
     password: str
 
+class EmailRequest(BaseModel):
+    subject: str
+    body: str
+    recipient: EmailStr
+
 
 class SRSGeneratorRequest(BaseModel):
     project_id: str = Field(..., description="Unique identifier for the project")
