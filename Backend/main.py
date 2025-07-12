@@ -9,11 +9,7 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-<<<<<<< HEAD
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
-=======
     UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest, FetchUserChatDetailRequest,
->>>>>>> dc0f6dd7cbf52e18e1e48b8e9733b99c395fd8c5
     TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
@@ -38,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="SprintSpeed", lifespan=lifespan)
 
-allow_origins=["http://localhost:3000"]
+allow_origins=["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -306,12 +302,8 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         db_obj.insert_conversation(
             conversation_id=agent_request.conversation_id,
             project_id=agent_request.project_id,
-<<<<<<< HEAD
-            chat_type=agent_request.chat_type
-=======
             chat_type=agent_request.chat_type,
             user_id=agent_request.user_id
->>>>>>> dc0f6dd7cbf52e18e1e48b8e9733b99c395fd8c5
         )
 
         #Read Files
@@ -395,13 +387,6 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
         )
         # Generate email summary
         response = email_summary_generator_agent.generate_summary(
-<<<<<<< HEAD
-            agent_request.model_id, agent_request.temperature , src_document
-        )
-
-        #TODO
-        return JSONResponse(content={"summary": response.get("")}, status_code=200)
-=======
             agent_request.model_id, agent_request.model_type, agent_request.temperature , src_document
         )
 
@@ -428,102 +413,10 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
             content={"status": "error", "message": f"Error sending email: {e}"},
             status_code=500
         )
->>>>>>> dc0f6dd7cbf52e18e1e48b8e9733b99c395fd8c5
 
 
     except Exception as e:
         logger.error(f"Error in email summary generator: {str(e)}")
-<<<<<<< HEAD
-        return handle_api_error(e)
-
-@app.get("/models")
-async def get_models():
-    try:
-        models = db_obj.get_all_llm_models()  
-
-        model_list = [
-            {
-                "model_id": model[0],
-                "display_model_name": model[1],
-                "model_name": model[2],
-                "model_type": model[3],
-                "context_window": model[4],
-                "max_token": model[5],
-                "location": model[6],
-                "is_image_support": model[7],
-                "is_deleted": model[8],
-                "created_at": model[9].strftime('%Y-%m-%d %H:%M:%S')
-            }
-            for model in models
-        ]
-
-        return JSONResponse(
-            content={"status": "success", "models": model_list},
-            status_code=200
-        )
-
-    except Exception as e:
-        return handle_api_error(e)@app.post("/task-generator-agent")
-
-@app.get("/task_creation")
-def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
-    try:
-
-        src_document = db_obj.get_finalize_srs(
-            project_id=agent_request. project_id,
-        )
-        task_generator = TaskPlannerAgent()
-        task_result = task_generator.generate_task_plan(
-            model_type=agent_request.model_type,
-            model_id=agent_request.model_id,
-            temperature=agent_request.temperature,
-            src_document=src_document
-        )
-
-        task = task_result.get("tasks", [])
-        db_obj.insert_task(
-            project_id=agent_request.project_id,
-            task_data=task
-        )
-        return JSONResponse(content=task_result, status_code=200)
-   
-    except HTTPException as he:
-        # Re-raise HTTP exceptions
-        raise he
-    except Exception as e:
-        logger.error(f"Error uploading files: {str(e)}")
-        return handle_api_error(e)
-
-
-@app.post("/fetch-user-chat-info")
-async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
-    try:
-        user_id = request.user_id
-        chat_info = db_obj.get_user_chat_info(user_id)
-
-        if not chat_info:
-            return JSONResponse(
-                content={"status": "error", "message": "No chat information found for the user"},
-                status_code=404
-            )
-
-        return JSONResponse(
-            content={"status": "success", "chat_info": chat_info},
-            status_code=200
-        )
-
-    except Exception as e:
-        logger.error(f"Error fetching user chat info: {str(e)}")
-        return handle_api_error(e)
-    
-@app.post("/fetch-user-chat-details")
-async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
-    try:
-        user_id = request.user_id
-        project_id = request.project_id
-        chat_details = db_obj.get_user_chat_details(user_id , project_id)
-
-=======
         return handle_api_error(e)
     
 @app.post("/send-email")
@@ -628,7 +521,6 @@ async def fetch_user_chat_details(request: FetchUserChatDetailRequest):
         project_id = request.project_id
         chat_details = db_obj.get_user_chat_details(user_id , project_id)
 
->>>>>>> dc0f6dd7cbf52e18e1e48b8e9733b99c395fd8c5
         if not chat_details:
             return JSONResponse(
                 content={"status": "error", "message": "No chat details found for the user"},
