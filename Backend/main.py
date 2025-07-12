@@ -7,7 +7,9 @@ from datetime import datetime
 import uuid
 import traceback
 from typing import List, Optional
-from models import UserRegisterRequest, UserLogin
+from models import (
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest
+)
 
 
 from utils.chat_history_manager import ChatHistoryManager
@@ -134,24 +136,24 @@ def upload_files(
         return handle_api_error(e)
 
 @app.post("/generate-srs-proposal")
-def generate_srs_proposal(
-    request: Request,
-    project_id: str = Form(...),
-    model_type: str = Form(default="openai"),
-    model_id: str = Form(default="gpt-4o"),
-    temperature: Optional[float] = Form(default=0.2),
-    user_query: str = Form(...)
-    # files: Optional[List[UploadFile]] = File(None),
-    ):
+def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
     try:
 
-        history = ChatHistoryManager(session_id=project_id)
+        history = ChatHistoryManager(session_id=agent_request.project_id)
         user_and_agent_chat_message = history.create_proposal_user_message_string()
 
+        #Insert Project and Conversation
+        db_obj.insert_project(
+            project_id=agent_request.project_id,
+            project_name=agent_request.project_name, 
+            conversation_id=agent_request.conversation_id
+        )
 
         #Read Files
-        # file_text = process_files_for_storage(files)
-        file_text = ''
+        file_text = db_obj.read_files(
+            file_ids=agent_request.file_ids,
+        )
+
         # Initialize research agent
         proposal_generator_agent_obj = SRSCreatorAgent()
         
@@ -163,10 +165,10 @@ def generate_srs_proposal(
             try:
                 for chunk in proposal_generator_agent_obj.generate_srs_document(
                     chat_history = user_and_agent_chat_message,
-                    user_query = user_query,
-                    model_type = model_type , 
-                    temperature = temperature,
-                    model_id = model_id,
+                    user_query = agent_request.user_query,
+                    model_type = agent_request.model_type , 
+                    temperature = agent_request.temperature,
+                    model_id = agent_request.model_id,
                     file_text = file_text
                 ):
                     if first_chunk:
@@ -193,8 +195,17 @@ def generate_srs_proposal(
 
                 # Store chat history after streaming completes
                 history.store_proposal_chat_history(
-                    user_query=user_query, 
+                    user_query=agent_request.user_query, 
                     agent_response=accumulated_proposal
+                )
+
+
+                db_obj.insert_conversation_message(
+                    conversation_id=agent_request.conversation_id,
+                    user_query=agent_request.user_query,
+                    agent_response=accumulated_proposal,
+                    model_id=agent_request.model_id,
+                    model_type = agent_request.model_type,
                 )
 
 
