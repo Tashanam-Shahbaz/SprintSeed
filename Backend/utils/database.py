@@ -349,18 +349,21 @@ class DB:
         except Exception as e:
             logger.error(f"Error retrieving LLM models: {e}")
             raise Exception("Failed to retrieve LLM models.")
+    
     def get_role_id_by_name(self, role_name: str):
         query = """
             SELECT role_id FROM task_management.roles WHERE role_name = %s
         """
         result = self.retrieve_data(query=query, data=(role_name,))
         return result if result else None
+    
     def check_user_query(self, email: str) -> bool:
         query = """
             SELECT 1 FROM task_management.users WHERE email = %s
         """
         result = self.retrieve_data(query=query, data=(email,))
         return result
+    
     def insert_user(self, user_data: tuple):
         query = """
             INSERT INTO task_management.users 
@@ -377,6 +380,7 @@ class DB:
         """
         result = self.retrieve_data(query=query, data=(email,))
         return result if result else None
+    
     def get_role(self):
         query = """
             SELECT role_id, role_name, description 

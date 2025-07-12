@@ -100,3 +100,50 @@ class SRSCreatorAgent(Agent, ABC):
                 
         except Exception as e:
             raise Exception(f"Error streaming response generate_srs_document: {e}")
+        
+
+
+    def generate_summary(self, model_id, temperature , src_document):
+        try:
+
+            base_prompt = f"""
+            <SYSTEM_PROMPT>
+            You are an executive-level technical communication specialist. Create a concise, professional summary of the SRS document below formatted as a stakeholder email.
+            JSON FORMAT:
+            {{
+            "subject": "SRS Summary for {src_document}",
+            "body": "Body here",
+            }}
+            Your summary must include:
+            • Project overview (1-2 sentences)
+            • 3-5 key requirements/features
+            • Technical approach highlights
+            • Critical timeline milestones
+            • Clear next steps
+            
+            Keep the summary under 300 words. Use professional language, bullet points for clarity, and a formal but approachable tone.
+            
+            Document to summarize:
+            {src_document}
+            </SYSTEM_PROMPT>
+            """
+            
+            component = adjust_prompt_and_history_for_proposal(model_id, base_prompt, '', src_document)
+            
+            context_prompt = component.get('prompt', base_prompt)
+            required_token = component.get('required_token', 8192)
+            model_name = component.get('model_name', model_id)
+            model_type = component.get('model_type', model_type)
+            
+            self.initialize_model_from_child(
+                model_id=model_name,
+                max_tokens=required_token,
+                temperature=temperature,
+                model_type=model_type,
+                location=component.get('location')
+            )
+            response = self.generate_llm_response_in_json(context_prompt)
+            return response
+
+        except Exception as e:
+            raise Exception(f"Error streaming response generate_summary: {e}")

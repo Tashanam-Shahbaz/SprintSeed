@@ -9,7 +9,7 @@ import traceback
 from typing import List, Optional
 from models import (
     UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
-    TaskCreatorAgentRequest
+    TaskCreatorAgentRequest , EmailSummaryGeneratorRequest
 )
 
 
@@ -363,7 +363,29 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
     except Exception as e:
         # logger.log(message=f"Unhandled erragentor: {e}", log_level="ERROR")
         return handle_api_error(e)
-    
+
+
+@app.post("/email-summary-generator")
+async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
+    try:
+       
+        # Initialize email summary generator agent
+        email_summary_generator_agent = SRSCreatorAgent()
+        src_document = db_obj.get_finalize_srs(
+            project_id=agent_request.project_id,
+        )
+        # Generate email summary
+        response = email_summary_generator_agent.generate_summary(
+            agent_request.model_id, agent_request.temperature , src_document
+        )
+
+        return JSONResponse(content={"summary": response}, status_code=200)
+
+
+    except Exception as e:
+        logger.error(f"Error in email summary generator: {str(e)}")
+        return handle_api_error(e)
+
 @app.get("/models")
 async def get_models():
     try:
