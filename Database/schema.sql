@@ -132,3 +132,20 @@ CREATE TABLE IF NOT EXISTS task_management.conversation_attachment (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE
 );
+
+
+-- Add unique constraint to username
+ALTER TABLE task_management.users
+ADD CONSTRAINT unique_username UNIQUE (username);
+
+-- Add unique constraint to email
+ALTER TABLE task_management.users
+ADD CONSTRAINT unique_email UNIQUE (email);
+
+-- Insert predefined roles with manual role_id values
+INSERT INTO task_management.roles (role_id, role_name, description)
+VALUES 
+  ('1', 'Project Manager', 'Responsible for managing the project and coordinating teams.'),
+  ('2', 'Frontend Developer', 'Responsible for UI/UX and client-side application development.'),
+  ('3', 'Backend Developer', 'Handles server-side logic, database, and application integration.'),
+  ('4', 'Database Manager', 'Manages the database schema, security, and data integrity.');
