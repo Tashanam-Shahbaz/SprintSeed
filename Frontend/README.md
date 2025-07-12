@@ -1,69 +1,220 @@
-# React + TypeScript + Vite
+# SprintSeed UI - AI-Powered SRS Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, professional React application for generating Software Requirements Specification (SRS) documents using AI. Built with React, Tailwind CSS, and featuring a clean, polished user interface.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🔐 Authentication
+- Clean, modern login interface
+- Glass-effect design with smooth animations
+- Responsive form validation
 
-## Expanding the ESLint configuration
+### 💬 Chat Interface
+- Real-time chat-like interaction with AI
+- File attachment support for project requirements
+- Multiple AI model selection (Gemini 2.5 Flash variants)
+- Chat history management with sidebar navigation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📄 SRS Document Generation
+- AI-powered SRS document creation
+- Download functionality for generated documents
+- Document preview and refinement capabilities
+- Professional document formatting
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📧 Email Integration
+- Send SRS documents via email
+- Custom recipient and message fields
+- Automatic document attachment
+- Professional email modal interface
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 🎨 Design Features
+- Modern, professional UI design
+- Sophisticated blue-gray and sage green color palette
+- Smooth animations and micro-interactions
+- Glass-effect elements and soft shadows
+- Fully responsive design
+- Dark mode support
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Technology Stack
+
+- **Frontend Framework**: React 19.1.0
+- **Styling**: Tailwind CSS 4.1.7
+- **UI Components**: Custom components built with Radix UI primitives
+- **Icons**: Lucide React
+- **Build Tool**: Vite
+- **Package Manager**: pnpm
+
+## Project Structure
+
+```
+sprintseed-ui/
+├── src/
+│   ├── components/
+│   │   ├── auth/
+│   │   │   └── LoginForm.jsx
+│   │   ├── chat/
+│   │   │   ├── ChatArea.jsx
+│   │   │   ├── ChatInput.jsx
+│   │   │   └── ChatMessage.jsx
+│   │   ├── email/
+│   │   │   └── EmailModal.jsx
+│   │   ├── layout/
+│   │   │   ├── Header.jsx
+│   │   │   ├── Layout.jsx
+│   │   │   └── Sidebar.jsx
+│   │   └── ui/
+│   │       ├── Button.jsx
+│   │       ├── Card.jsx
+│   │       ├── Input.jsx
+│   │       ├── Modal.jsx
+│   │       └── Textarea.jsx
+│   ├── pages/
+│   │   ├── ChatPage.jsx
+│   │   └── LoginPage.jsx
+│   ├── lib/
+│   │   └── utils.js
+│   ├── App.jsx
+│   ├── App.css
+│   └── main.jsx
+├── tailwind.config.js
+├── package.json
+└── README.md
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
+- Node.js (v18 or higher)
+- pnpm (recommended) or npm
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd sprintseed-ui
 ```
+
+2. Install dependencies:
+```bash
+pnpm install
+# or
+npm install
+```
+
+3. Start the development server:
+```bash
+pnpm run dev
+# or
+npm run dev
+```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+### Building for Production
+
+```bash
+pnpm run build
+# or
+npm run build
+```
+
+## Usage
+
+### Login
+1. Enter any username and password (demo mode accepts any credentials)
+2. Click "LOGIN" to access the main application
+
+### Creating SRS Documents
+1. Select an AI model from the available options
+2. Type your project requirements or attach a file
+3. Click the send button to generate an SRS document
+4. Download the generated document using the download button
+
+### Sending Documents via Email
+1. Click the "SEND EMAIL" button
+2. Enter the recipient's email address
+3. Add a custom subject and message (optional)
+4. Click "Send Email" to share the document
+
+### Chat Management
+- Use "New Chat" to start a fresh conversation
+- Switch between chat histories using the sidebar
+- Each chat maintains its own message history
+
+## Customization
+
+### Color Scheme
+The application uses a sophisticated color palette defined in `tailwind.config.js`:
+- **Primary**: Blue-gray tones for professional appearance
+- **Accent**: Sage green for interactive elements
+- **Secondary**: Warm neutrals for supporting elements
+
+### Styling
+Custom styles are defined in `src/App.css` including:
+- SprintSeed logo styling
+- Animation keyframes
+- Component-specific styles
+- Glass effects and gradients
+
+### Components
+All UI components are modular and reusable:
+- Consistent design patterns
+- Proper TypeScript support
+- Accessible markup
+- Responsive design
+
+## API Integration
+
+The application is designed to work with backend APIs. Key integration points:
+
+### Authentication
+```javascript
+// In LoginPage.jsx
+const handleLogin = (credentials) => {
+  // Replace with actual API call
+  // Example: await authAPI.login(credentials)
+};
+```
+
+### SRS Generation
+```javascript
+// In ChatPage.jsx
+const handleSendMessage = async (messageData) => {
+  // Replace with actual API call
+  // Example: await srsAPI.generateDocument(messageData)
+};
+```
+
+### Email Sending
+```javascript
+// In App.jsx
+const handleEmailSend = async (emailData) => {
+  // Replace with actual API call
+  // Example: await emailAPI.sendDocument(emailData)
+};
+```
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions, please contact the development team or create an issue in the repository.
+
