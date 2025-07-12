@@ -209,7 +209,7 @@ class DB:
             finally:
                 self.close_connection_and_cursor(connection, cursor)
 
-    def insert_project(self, project_id: str, project_name : str ,  conversation_id: str):
+    def insert_project(self, project_id: str, project_name : str ,  conversation_id: str , user_id : str ):
         """Insert a new project into the database if it does not already exist."""
         try:
             # Check if project exists
@@ -223,10 +223,10 @@ class DB:
 
             # Insert if not exists
             insert_query = f"""
-                INSERT INTO {self.schema}.projects (project_id, project_name, created_at)
-                VALUES (%s, %s , CURRENT_TIMESTAMP)
+                INSERT INTO {self.schema}.projects (project_id, project_name, created_by ,created_at )
+                VALUES (%s, %s , %s , CURRENT_TIMESTAMP)
             """
-            data = (project_id, project_name)
+            data = (project_id, project_name , user_id )
             self.execute_query(insert_query, data)
             logger.info(f"Project inserted successfully: {project_id}")
         except Exception as e:
@@ -336,4 +336,188 @@ class DB:
         except Exception as e:
             logger.error(f"Error inserting conversation message: {e}")
             return
-        
+                
+    def get_all_llm_models(self):
+        try:
+            query = """
+                SELECT model_id, display_model_name, model_name, model_type, context_window, max_token, location, is_image_support, is_deleted, created_at
+                FROM task_management.llm_models
+                WHERE is_deleted = FALSE
+                ORDER BY created_at DESC
+            """
+            return self.retrieve_data(query=query)
+        except Exception as e:
+            logger.error(f"Error retrieving LLM models: {e}")
+            raise Exception("Failed to retrieve LLM models.")
+    
+    def get_role_id_by_name(self, role_name: str):
+        query = """
+            SELECT role_id FROM task_management.roles WHERE role_name = %s
+        """
+        result = self.retrieve_data(query=query, data=(role_name,))
+        return result if result else None
+    
+    def check_user_query(self, email: str) -> bool:
+        query = """
+            SELECT 1 FROM task_management.users WHERE email = %s
+        """
+        result = self.retrieve_data(query=query, data=(email,))
+        return result
+    
+    def insert_user(self, user_data: tuple):
+        query = """
+            INSERT INTO task_management.users 
+            (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+        """
+        self.execute_query(query=query, data=user_data)
+
+    def get_user_by_email(self, email: str):
+        query = """
+            SELECT user_id, username, email, password, first_name, last_name, role_id 
+            FROM task_management.users 
+            WHERE email = %s
+        """
+        result = self.retrieve_data(query=query, data=(email,))
+        return result if result else None
+    
+    def get_role(self):
+        query = """
+            SELECT role_id, role_name, description 
+            FROM task_management.roles
+        """
+        return self.retrieve_data(query=query)
+
+
+    def get_finalize_srs(self, project_id: str) -> str:
+        """Retrieve the final SRS from the conversation messages."""
+        try:
+
+            query = f"""
+                SELECT agent_response 
+                FROM {self.schema}.conversation_message cm
+                JOIN {self.schema}.conversation c ON cm.conversation_id = c.conversation_id
+                WHERE c.project_id = %s 
+                Order by cm.created_at DESC LIMIT 1"""
+            
+            result = self.retrieve_data(query, (project_id,))
+            if result:
+                return result[0][0]  # Return the agent response
+            return ""
+        except Exception as e:
+            logger.error(f"Error retrieving final SRS: {e}")
+            raise Exception(f"Error retrieving final SRS: {e}")
+
+    def insert_task(self, project_id: str, task_data: List[Dict[str, Any]]):
+        """
+        Insert multiple tasks into the tasks table using a single query with multiple value sets.
+        """
+        try:
+            if not task_data:
+                return []
+                
+            # Start building the query
+            insert_query = f"""
+                INSERT INTO {self.schema}.tasks (
+                    task_id, title, description, project_id, status, priority, complexity,
+                    estimated_hours, created_by, due_date, technical_requirements, acceptance_criteria, 
+                    created_at, updated_at
+                ) VALUES 
+            """
+            
+            # Collect all task IDs and prepare data tuples
+            task_ids = []
+            all_values = ()
+            
+            # Build the values part of the query and collect all data
+            for task in task_data:
+                # Generate task ID if not provided
+                task_id = task.get("id") or task.get("task_id") or f"TASK-{str(uuid.uuid4())[:8]}"
+                task_ids.append(task_id)
+                
+                # Add value placeholders for this task
+                insert_query += "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),"
+                
+                # Add actual values to the data tuple
+                task_values = (
+                    task_id,
+                    task.get("task_title") or task.get("title"),
+                    task.get("description"),
+                    project_id,
+                    task.get("status", "open"),
+                    task.get("priority", "medium"),
+                    task.get("complexity", "medium"),
+                    task.get("estimated_hours", 4),
+                    task.get("created_by"),
+                    task.get("due_date"),
+                    task.get("technical_requirements", ""),
+                    task.get("acceptance_criteria", "")
+                )
+                all_values += task_values
+            
+            # Remove the trailing comma
+            insert_query = insert_query[:-1]
+            
+            # Execute the query with all data
+            self.execute_query(insert_query, all_values)
+            logger.info(f"{len(task_data)} task(s) inserted successfully.")
+            
+            return task_ids
+            
+        except Exception as e:
+            logger.error(f"Error inserting tasks: {e}")
+            raise Exception(f"Error inserting tasks: {e}")
+
+    def get_user_chat_details(self, user_id: str , project_id : str ) -> List[Dict[str, Any]]:
+        """
+        Retrieve chat information for a specific user.
+        Returns a list of dictionaries containing chat details.
+        """
+        try:
+            query = f"""
+                SELECT c.conversation_id, c.project_id, c.chat_type,  TO_CHAR(c.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+                       cm.message_id, cm.user_query, cm.agent_response, TO_CHAR(cm.created_at, 'YYYY-MM-DD HH24:MI:SS') AS message_created_at
+                FROM {self.schema}.conversation c
+                JOIN {self.schema}.conversation_message cm ON c.conversation_id = cm.conversation_id
+                WHERE c.user_id = %s and c.project_id = %s
+                ORDER BY c.created_at DESC
+            """
+            result = self.retrieve_data(query, (user_id,project_id))
+            return [
+                {
+                    "conversation_id": row[0],
+                    "project_id": row[1],
+                    "chat_type": row[2],
+                    "created_at": row[3],
+                    "message_id": row[4],
+                    "user_query": row[5],
+                    "agent_response": row[6],
+                    "message_created_at": row[7]
+                } for row in result
+            ]
+        except Exception as e:
+            logger.error(f"Error retrieving user chat info: {e}")
+            raise Exception(f"Error retrieving user chat info: {e}")
+    
+    def get_user_chat_info(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        Retrieve chat information for a specific user.
+        Returns a list of dictionaries containing chat details.
+        """
+        try:
+            query = f"""
+                SELECT project_id , project_name, TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
+                from {self.schema}.projects
+                WHERE created_by = %s ORDER BY created_at DESC
+            """
+            result = self.retrieve_data(query, (user_id,))
+            return [
+                {
+                    "project_id": row[0],
+                    "project_name": row[1],
+                    "created_at": row[2]
+                } for row in result
+            ]
+        except Exception as e:
+            logger.error(f"Error retrieving user chat info: {e}")
+            raise Exception(f"Error retrieving user chat info: {e}")

@@ -8,7 +8,8 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
+    TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
 
@@ -16,7 +17,8 @@ from utils.chat_history_manager import ChatHistoryManager
 
 #Agents
 from agents.srs_creator_agent import SRSCreatorAgent
-
+from agents.task_planner_agent import TaskPlannerAgent
+# from agents.task_creator_agent import TaskCreatorAgent
 
 from utils.helpers import  process_files_for_storage
 
@@ -100,15 +102,8 @@ def demo(request: Request):
 @app.post("/register")
 async def register_user(payload: UserRegisterRequest):
     try:
-        check_user_query = """
-            SELECT 1 FROM task_management.users 
-            WHERE username = %s OR email = %s
-        """
-        
-        existing_user = db_obj.retrieve_data(
-            query=check_user_query,
-            data=(payload.username, payload.email)
-        )
+       
+        existing_user=db_obj.check_user_query(payload.email)
 
         if existing_user:
             return JSONResponse(
@@ -116,20 +111,8 @@ async def register_user(payload: UserRegisterRequest):
                 status_code=409
             )
 
-        # insert_user_query = """
-        #     INSERT INTO task_management.users 
-        #     (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
-        #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
-        # """
-
-        # 2. Fetch role_id using role_name
-        fetch_role_id_query = """
-            SELECT role_id FROM task_management.roles WHERE role_name = %s
-        """
-        role_result = db_obj.retrieve_data(
-            query=fetch_role_id_query,
-            data=(payload.role_name,)
-        )
+       
+        role_result=db_obj.get_role_id_by_name(payload.role_name)
         if not role_result:
             return JSONResponse(
                 content={"status": "error", "message": "Invalid role name"},
@@ -137,31 +120,24 @@ async def register_user(payload: UserRegisterRequest):
             )
         role_id = role_result[0][0]
 
-        # 3. Insert new user with the role_id
-        insert_user_query = """
-            INSERT INTO task_management.users 
-            (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
-        """
 
         user_id = str(uuid.uuid4())
-        password=payload.password
+        now = datetime.now()
 
-        db_obj.execute_query(
-            query=insert_user_query,
-            data=(
-                user_id,
-                payload.username,
-                payload.email,
-                password,
-                payload.first_name,
-                payload.last_name,
-                role_id,
-                datetime.now(),
-                datetime.now()
-            )
+        user_data = (
+            user_id,
+            payload.username,
+            payload.email,
+            payload.password,  
+            payload.first_name,
+            payload.last_name,
+            role_id,
+            now,
+            now
         )
-
+                
+        db_obj.insert_user(user_data)
+       
         return JSONResponse(
             content={"status": "success", "message": "User registered successfully", "user_id": user_id},
             status_code=201
@@ -173,16 +149,8 @@ async def register_user(payload: UserRegisterRequest):
 @app.post("/login")
 async def login_user(payload: UserLogin):
     try:
-        fetch_user_query = """
-            SELECT user_id, username, email, password, first_name, last_name, role_id 
-            FROM task_management.users 
-            WHERE email = %s
-        """
-
-        result = db_obj.retrieve_data(
-            query=fetch_user_query,
-            data=(payload.email,)
-        )
+        
+        result=db_obj.get_user_by_email(payload.email)
 
         if not result:
             return JSONResponse(
@@ -222,13 +190,8 @@ async def login_user(payload: UserLogin):
 @app.get("/roles")
 async def get_roles():
     try:
-        fetch_roles_query = """
-            SELECT role_id, role_name, description 
-            FROM task_management.roles
-        """
-
-        roles = db_obj.retrieve_data(query=fetch_roles_query)
-
+        
+        roles=db_obj.get_role()
         roles_list = [
             {
                 "role_id": role[0],
@@ -255,7 +218,8 @@ def create_project(
         db_obj.insert_project(
             project_id=creat_project.project_id,
             project_name=creat_project.project_name, 
-            conversation_id=creat_project.conversation_id
+            conversation_id=creat_project.conversation_id,
+            user_id  = creat_project.user_id
         )
         
         db_obj.insert_conversation(
@@ -323,7 +287,14 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         db_obj.insert_project(
             project_id=agent_request.project_id,
             project_name=agent_request.project_name, 
-            conversation_id=agent_request.conversation_id
+            conversation_id=agent_request.conversation_id,
+            user_id=agent_request.user_id
+        )
+
+        db_obj.insert_conversation(
+            conversation_id=agent_request.conversation_id,
+            project_id=agent_request.project_id,
+            chat_type=agent_request.chat_type
         )
 
         #Read Files
@@ -392,10 +363,133 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         return StreamingResponse(stream_proposal(), media_type="text/event-stream")
 
     except Exception as e:
-        # logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
+        # logger.log(message=f"Unhandled erragentor: {e}", log_level="ERROR")
+        return handle_api_error(e)
+
+
+@app.post("/email-summary-generator")
+async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
+    try:
+       
+        # Initialize email summary generator agent
+        email_summary_generator_agent = SRSCreatorAgent()
+        src_document = db_obj.get_finalize_srs(
+            project_id=agent_request.project_id,
+        )
+        # Generate email summary
+        response = email_summary_generator_agent.generate_summary(
+            agent_request.model_id, agent_request.temperature , src_document
+        )
+
+        #TODO
+        return JSONResponse(content={"summary": response.get("")}, status_code=200)
+
+
+    except Exception as e:
+        logger.error(f"Error in email summary generator: {str(e)}")
+        return handle_api_error(e)
+
+@app.get("/models")
+async def get_models():
+    try:
+        models = db_obj.get_all_llm_models()  
+
+        model_list = [
+            {
+                "model_id": model[0],
+                "display_model_name": model[1],
+                "model_name": model[2],
+                "model_type": model[3],
+                "context_window": model[4],
+                "max_token": model[5],
+                "location": model[6],
+                "is_image_support": model[7],
+                "is_deleted": model[8],
+                "created_at": model[9].strftime('%Y-%m-%d %H:%M:%S')
+            }
+            for model in models
+        ]
+
+        return JSONResponse(
+            content={"status": "success", "models": model_list},
+            status_code=200
+        )
+
+    except Exception as e:
+        return handle_api_error(e)@app.post("/task-generator-agent")
+
+@app.get("/task_creation")
+def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
+    try:
+
+        src_document = db_obj.get_finalize_srs(
+            project_id=agent_request. project_id,
+        )
+        task_generator = TaskPlannerAgent()
+        task_result = task_generator.generate_task_plan(
+            model_type=agent_request.model_type,
+            model_id=agent_request.model_id,
+            temperature=agent_request.temperature,
+            src_document=src_document
+        )
+
+        task = task_result.get("tasks", [])
+        db_obj.insert_task(
+            project_id=agent_request.project_id,
+            task_data=task
+        )
+        return JSONResponse(content=task_result, status_code=200)
+   
+    except HTTPException as he:
+        # Re-raise HTTP exceptions
+        raise he
+    except Exception as e:
+        logger.error(f"Error uploading files: {str(e)}")
+        return handle_api_error(e)
+
+
+@app.post("/fetch-user-chat-info")
+async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        chat_info = db_obj.get_user_chat_info(user_id)
+
+        if not chat_info:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat information found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_info": chat_info},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat info: {str(e)}")
         return handle_api_error(e)
     
+@app.post("/fetch-user-chat-details")
+async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        project_id = request.project_id
+        chat_details = db_obj.get_user_chat_details(user_id , project_id)
 
+        if not chat_details:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat details found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_details": chat_details},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat details: {str(e)}")
+        return handle_api_error(e)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)

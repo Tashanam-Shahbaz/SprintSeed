@@ -149,3 +149,55 @@ VALUES
   ('2', 'Frontend Developer', 'Responsible for UI/UX and client-side application development.'),
   ('3', 'Backend Developer', 'Handles server-side logic, database, and application integration.'),
   ('4', 'Database Manager', 'Manages the database schema, security, and data integrity.');
+
+-- CREATE TABLE task_management.llm_models (
+--     model_id VARCHAR(100) PRIMARY KEY,  
+--     display_model_name VARCHAR(100) NOT NULL,
+--     model_name VARCHAR(100) NOT NULL UNIQUE,
+--     model_type VARCHAR(50) NOT NULL,
+--     context_window INTEGER,
+--     max_token INTEGER,
+--     location VARCHAR(100),
+--     is_image_support BOOLEAN DEFAULT FALSE,
+--     is_deleted BOOLEAN DEFAULT FALSE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+INSERT INTO task_management.llm_models (
+	model_id,
+    display_model_name,
+    model_name,
+    model_type,
+    max_token,
+    context_window,
+    location,
+    is_image_support
+) VALUES 
+-- 1
+(1,'Gemini 2.5 Pro', 'gemini-2.5-pro', 'google_genai', 64000, 1000000, 'us-central1', TRUE),
+--2
+(2,'GPT-4', 'gpt-4o', 'openai', 8192, 8192, 'us-central1', FALSE),
+-- 3
+(3,'Gemini 2.5 Flash', 'gemini-2.0-flash-exp', 'google_genai', 8192, 1048576, 'us-central1', TRUE),
+-- 4
+(4,'Gemini 2.0 Flash Thinking', 'gemini-2.0-flash-thinking-exp', 'google_genai', 64000, 1000000, 'us-central1', TRUE),
+-- 5
+(5,'Gemini 2.5 Flash', 'gemini-2.5-flash', 'google_genai', 64000, 1000000, 'us-central1', TRUE)
+
+
+-- Add technical_requirements column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN technical_requirements TEXT;
+
+-- Add acceptance_criteria column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN acceptance_criteria TEXT
+
+
+-- Add technical_requirements column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN technical_requirements TEXT;
+
+-- Add acceptance_criteria column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN acceptance_criteria TEXT
