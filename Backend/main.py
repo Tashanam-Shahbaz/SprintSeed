@@ -9,7 +9,7 @@ import traceback
 from typing import List, Optional
 from models import (
     UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
-    TaskCreatorAgentRequest , EmailSummaryGeneratorRequest
+    TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
 
@@ -218,7 +218,8 @@ def create_project(
         db_obj.insert_project(
             project_id=creat_project.project_id,
             project_name=creat_project.project_name, 
-            conversation_id=creat_project.conversation_id
+            conversation_id=creat_project.conversation_id,
+            user_id  = creat_project.user_id
         )
         
         db_obj.insert_conversation(
@@ -445,6 +446,48 @@ def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
         logger.error(f"Error uploading files: {str(e)}")
         return handle_api_error(e)
 
+
+@app.post("/fetch-user-chat-info")
+async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        chat_info = db_obj.get_user_chat_info(user_id)
+
+        if not chat_info:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat information found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_info": chat_info},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat info: {str(e)}")
+        return handle_api_error(e)
+    
+@app.post("/fetch-user-chat-details")
+async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        chat_details = db_obj.get_user_chat_details(user_id)
+
+        if not chat_details:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat details found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_details": chat_details},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat details: {str(e)}")
+        return handle_api_error(e)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)

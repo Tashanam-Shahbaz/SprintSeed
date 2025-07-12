@@ -47,7 +47,7 @@ class EmailSummaryGeneratorRequest(BaseModel):
     model_id: str = Field(default="gpt-4o", description="ID of the model to use for email summary generation")
     temperature: Optional[float] = Field(default=0.2, description="Temperature setting for the model")
 
-    
+
 class CreateProjectRequest(BaseModel):
     project_id: str = Field(..., description="Unique identifier for the project")
     project_name: str = Field(..., description="Name of the project")
@@ -55,9 +55,13 @@ class CreateProjectRequest(BaseModel):
         default_factory=lambda: str(uuid.uuid4()), description="Unique identifier for the conversation"
     )
     chat_type: str = Field(default="srs_document", description="Type of chat for the project")
+    user_id: str = Field(..., description="Unique identifier for the user")
 
 class TaskCreatorAgentRequest(BaseModel):
     project_id: str = Field(..., description="Unique identifier for the project")
     model_type : str = Field(default="openai", description="Type of model to use for task creation")
     model_id : str = Field(default="gpt-4o", description="ID of the model to use for task creation")
     temperature: Optional[float] = Field(default=0.2, description="Temperature setting for the model")
+
+class FetchUserChatInfoRequest(BaseModel):
+    user_id: str = Field(..., description="Unique identifier for the user")
