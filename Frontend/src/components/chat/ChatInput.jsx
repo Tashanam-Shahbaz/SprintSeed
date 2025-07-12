@@ -1,23 +1,28 @@
-import React, { useState } from 'react';
-import { Send, Paperclip, X } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Textarea } from '../ui/Textarea';
-import { cn } from '../../lib/utils';
+import React, { useState, useEffect } from "react";
+import { Send, Paperclip, X } from "lucide-react";
+import { Button } from "../ui/Button";
+import { Textarea } from "../ui/Textarea";
+import { cn } from "../../lib/utils";
 
 const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [attachedFile, setAttachedFile] = useState(null);
+  const [models, setModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim() || attachedFile) {
+    if ((message.trim() || attachedFile) && selectedModel) {
       onSendMessage({
         content: message.trim(),
         file: attachedFile,
-        timestamp: new Date().toLocaleTimeString()
+        model: selectedModel,
+        timestamp: new Date().toLocaleTimeString(),
       });
-      setMessage('');
+      setMessage("");
       setAttachedFile(null);
+    } else if (!selectedModel) {
+      alert("Please select a model before sending a message.");
     }
   };
 
@@ -32,16 +37,39 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
     setAttachedFile(null);
   };
 
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/models");
+        const data = await res.json();
+        if (data.status === "success") {
+          setModels(data.models);
+        }
+      } catch (err) {
+        console.error("Failed to fetch models", err);
+      }
+    };
+
+    fetchModels();
+  }, []);
+
   return (
     <div className="border-t border-border bg-background p-4">
       {/* Model Selection */}
-      <div className="flex gap-2 mb-4">
-        {['Gemini 2.5 Flash', 'Gemini 2.5 Flash', 'Gemini 2.5 Flash', 'Gemini 2.5 Flash'].map((model, index) => (
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {models.map((model) => (
           <button
-            key={index}
-            className="model-tag px-3 py-1 rounded-full text-xs font-medium"
+            key={model.model_id}
+            type="button"
+            onClick={() => setSelectedModel(model)}
+            className={cn(
+              "model-tag px-3 py-1 rounded-full text-xs font-medium border transition",
+              selectedModel?.model_id === model.model_id
+                ? "bg-accent text-white border-accent"
+                : "bg-muted text-muted-foreground hover:bg-muted/70"
+            )}
           >
-            {model}
+            {model.display_model_name}
           </button>
         ))}
       </div>
@@ -56,11 +84,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
               ({(attachedFile.size / 1024).toFixed(1)} KB)
             </span>
           </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={removeAttachment}
-          >
+          <Button size="sm" variant="ghost" onClick={removeAttachment}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -76,7 +100,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
             className="min-h-[60px] pr-12 resize-none"
             disabled={disabled}
           />
-          
+
           {/* File Attach Button */}
           <label className="absolute right-3 top-3 cursor-pointer">
             <input
@@ -98,7 +122,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
           >
             <Send className="h-4 w-4" />
           </Button>
-          
+
           <Button
             type="button"
             onClick={onSendEmail}
@@ -114,4 +138,3 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
 };
 
 export default ChatInput;
-

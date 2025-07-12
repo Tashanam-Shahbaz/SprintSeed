@@ -5,24 +5,31 @@ import ChatPage from "./pages/ChatPage";
 import EmailModal from "./components/email/EmailModal";
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   const handleLogin = (userData) => {
     if (!userData) return;
 
-    setUser({
+    const newUser = {
       user_id: userData.user_id,
       username: userData.username,
       email: userData.email,
       role_id: userData.role_id,
       first_name: userData.first_name,
       last_name: userData.last_name,
-    });
+    };
+
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   const handleSendEmail = () => {
