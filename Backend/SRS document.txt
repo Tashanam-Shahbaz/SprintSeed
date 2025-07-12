@@ -1,238 +1,181 @@
-Of course. Based on your request, here is a detailed Software Requirements Specification (SRS) document for a web-based Workflow Approval System.
-
-This document is generated based on the high-level user query provided. Since no chat history was available, common industry-standard features for such a system have been inferred and included to create a comprehensive specification.
-
----
-
 ### **Software Requirements Specification (SRS)**
-### **for**
-### **Web-Based Workflow Approval System**
-
-**Version:** 1.0
-**Date:** October 26, 2023
+### **Task Management System**
 
 ---
 
-### **1. Introduction**
+### **1. INTRODUCTION**
 
-#### **1.1 Purpose**
-The purpose of this document is to provide a detailed description of the requirements for the Web-Based Workflow Approval System. The system's primary objective is to digitize and centralize the approval process, transforming outdated, paper-based or scattered digital methods into a unified, efficient, and transparent web-based platform. This document will guide the design, development, and testing of the software.
+#### **1.1 Purpose and Scope**
+The purpose of this document is to provide a detailed specification for the Task Management System. This system is a web-based application designed to help individuals and teams create, assign, track, and manage tasks efficiently.
 
-#### **1.2 Scope**
-The system will provide a platform for administrators to create and manage workflow templates, for users to submit requests based on these templates, and for designated approvers to review, approve, or reject these requests. The system will cover:
-*   User authentication and role-based access control.
-*   Creation and management of dynamic workflow templates.
-*   Submission of approval requests with attachments.
-*   A multi-step approval process.
-*   Real-time tracking of request status.
-*   Email notifications for key events.
-*   An audit trail/history for all requests.
+*   **Scope:** The initial version (v1.0) of the system will focus on core functionalities including user management, project creation, task management (CRUD operations), and a central dashboard for an at-a-glance overview.
+*   **Out of Scope:** Advanced features such as Gantt charts, time tracking, budget management, and third-party application integrations (beyond placeholder APIs) are considered out of scope for the initial release but are planned for future versions.
 
-The system will **not** include direct integration with third-party financial systems or real-time chat functionality in this version.
+#### **1.2 System Overview**
+The Task Management System will be developed using the MERN stack (MongoDB, Express.js, React, Node.js). It will feature a single-page application (SPA) frontend built with React that communicates with a RESTful API backend powered by Node.js and Express.js. All data, including user profiles, projects, and tasks, will be stored in a NoSQL MongoDB database. The architecture is designed for real-time updates, scalability, and maintainability.
 
-#### **1.3 Definitions, Acronyms, and Abbreviations**
-*   **SRS:** Software Requirements Specification
-*   **UI:** User Interface
-*   **UX:** User Experience
-*   **API:** Application Programming Interface
-*   **RBAC:** Role-Based Access Control
-*   **Workflow:** A defined sequence of tasks or steps required for an approval process.
-*   **Template:** A pre-defined structure of a workflow, including its steps and form fields.
-*   **Request:** An instance of a workflow initiated by a Requester.
-*   **Requester:** A user who initiates an approval request.
-*   **Approver:** A user responsible for approving or rejecting a request at a specific step.
-*   **Admin:** A privileged user who manages users, roles, and workflow templates.
+#### **1.3 Definitions and Acronyms**
 
-#### **1.4 Overview**
-This SRS is organized into several sections. Section 2 provides an overall description of the product, its users, and its operating environment. Section 3 details the core system features, broken down into three major tasks, each with its frontend (UI/UX), backend (API), and database specifications. Section 4 outlines the non-functional requirements of the system.
-
-### **2. Overall Description**
-
-#### **2.1 Product Perspective**
-The system will be a standalone, self-contained, web-based application. It will be accessible through modern web browsers on desktops and mobile devices. It will manage its own user database and workflow logic.
-
-#### **2.2 User Classes and Characteristics**
-The system will have three primary user roles:
-1.  **Administrator (Admin):**
-    *   **Responsibilities:** Manages the entire system. Creates and manages user accounts and roles. Designs, creates, and modifies workflow templates. Has oversight of all requests in the system.
-    *   **Technical Skills:** Should be comfortable with web application interfaces. No programming skills required.
-
-2.  **Requester (Standard User):**
-    *   **Responsibilities:** Initiates new approval requests by selecting a template, filling out the required information, and submitting it. Tracks the status of their own submitted requests.
-    *   **Technical Skills:** Basic web browsing skills.
-
-3.  **Approver:**
-    *   **Responsibilities:** Receives and reviews pending requests assigned to them. Can approve, reject, or add comments to a request. Views the history of requests they have processed.
-    *   **Technical Skills:** Basic web browsing skills.
-    *   *Note: A user can be both a Requester and an Approver.*
-
-### **3. System Features (The Three Major Tasks)**
-
-This section details the three core functionalities of the system.
+| Term      | Definition                                           |
+| :-------- | :--------------------------------------------------- |
+| **SRS**   | Software Requirements Specification                  |
+| **CRUD**  | Create, Read, Update, Delete                         |
+| **MERN**  | MongoDB, Express.js, React, Node.js                  |
+| **UI/UX** | User Interface / User Experience                     |
+| **API**   | Application Programming Interface                    |
+| **JWT**   | JSON Web Token                                       |
+| **RBAC**  | Role-Based Access Control                            |
+| **SSL/TLS** | Secure Sockets Layer / Transport Layer Security      |
+| **NoSQL** | A non-relational database                            |
 
 ---
 
-#### **TASK 1: Workflow Template Management (Admin Functionality)**
+### **2. FRONTEND SPECIFICATIONS**
 
-##### **3.1.1 Description and Priority**
-**Description:** This feature allows Administrators to create, view, update, and delete workflow templates. A template defines the form fields a requester must fill out and the sequence of approval steps. This is the backbone of the system.
-**Priority:** High
+#### **2.1 UI Design Description**
+The user interface will be clean, modern, and intuitive, prioritizing ease of use and clarity. The design will employ a minimalist aesthetic with a consistent color palette and typography to minimize cognitive load. Interactive elements will provide clear visual feedback to the user.
 
-##### **3.1.2 UI/UX Design (Frontend)**
-*   **Main View:** A dashboard screen titled "Workflow Templates" will display a list of all existing templates in a table format. The table will show columns for `Template Name`, `Description`, `Created Date`, and `Status (Active/Inactive)`. Each row will have "Edit" and "Deactivate/Activate" buttons. A prominent "Create New Template" button will be visible.
-*   **Creation/Editing View:**
-    *   This will be a multi-part form.
-    *   **Part 1: Basic Information:** Fields for `Template Name` (text input) and `Description` (textarea).
-    *   **Part 2: Form Builder:** An interactive section to define the data-entry form for the requester. The admin can add various field types (e.g., Text, Number, Date, File Upload, Dropdown). Each field will have properties like `Label`, `Field Type`, and a `Required` checkbox.
-    *   **Part 3: Approval Steps:** A dynamic, ordered list builder. The admin clicks "Add Step" to create a new approval level. For each step, they can assign one or more specific users or a user role (e.g., "Manager," "Finance Department") as the Approver. A drag-and-drop interface will allow for reordering the steps.
-    *   **Actions:** "Save Template" and "Cancel" buttons will be at the bottom of the page.
+#### **2.2 Screen Layouts and User Flows**
 
-##### **3.1.3 API Endpoints (Backend)**
+*   **Login/Registration Page:**
+    *   **Layout:** A centered form with fields for email and password. Links for "Sign Up" or "Log In" will toggle between the two forms.
+    *   **Flow:** A new user registers. Upon success, they are redirected to the main dashboard. An existing user logs in and is directed to the dashboard.
 
-| Method | Endpoint                     | Description                                                              |
-| :----- | :--------------------------- | :----------------------------------------------------------------------- |
-| `POST` | `/api/v1/admin/workflows`      | Creates a new workflow template. The request body contains all template details. |
-| `GET`  | `/api/v1/admin/workflows`      | Retrieves a paginated list of all workflow templates.                    |
-| `GET`  | `/api/v1/admin/workflows/{id}` | Retrieves the complete details of a single workflow template for editing. |
-| `PUT`  | `/api/v1/admin/workflows/{id}` | Updates an existing workflow template.                                   |
-| `PATCH`| `/api/v1/admin/workflows/{id}/status` | Activates or deactivates a workflow template.                   |
+*   **Dashboard (Main View):**
+    *   **Layout:** A primary navigation bar on the left or top. The main content area will display a summary of "My Tasks" (tasks assigned to the logged-in user) and a list of "Projects" they are a member of.
+    *   **Flow:** Users get a quick overview of their workload and can navigate to specific projects.
 
-##### **3.1.4 Database Design**
+*   **Project View:**
+    *   **Layout:** Displays the project title and description at the top. The main area is a Kanban-style board with columns for task statuses (e.g., "To Do," "In Progress," "Done"). Each task is represented as a card that can be dragged and dropped between columns. A button to "Add New Task" will be prominently displayed.
+    *   **Flow:** User selects a project from the dashboard. They can view all tasks, update a task's status by dragging it, or click on a task card to see more details.
 
-*   **Table: `workflow_templates`**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the template. |
-| `name` | `VARCHAR(255)` | NOT NULL | The public name of the workflow template. |
-| `description` | `TEXT` | NULL | A detailed description of the template's purpose. |
-| `status` | `ENUM('active', 'inactive')` | NOT NULL, DEFAULT 'active' | The current status of the template. |
-| `created_by` | `INT` | FOREIGN KEY (users.id) | The ID of the admin who created the template. |
-| `created_at` | `TIMESTAMP` | DEFAULT CURRENT_TIMESTAMP | Timestamp of creation. |
-| `updated_at` | `TIMESTAMP` | ON UPDATE CURRENT_TIMESTAMP | Timestamp of the last update. |
+*   **Task Detail Modal:**
+    *   **Layout:** An overlay modal showing the task title, full description, assignee, due date, priority, and status. It will include controls to edit or delete the task (based on user permissions).
+    *   **Flow:** User clicks on a task card to open the modal. They can view details or make changes and save them.
 
-*   **Table: `workflow_steps`**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the step. |
-| `template_id` | `INT` | FOREIGN KEY (workflow_templates.id) | Links the step to a workflow template. |
-| `step_order` | `INT` | NOT NULL | The sequential order of the step (1, 2, 3...). |
-| `approver_user_id` | `INT` | FOREIGN KEY (users.id), NULL | The specific user assigned to approve this step. |
-| `approver_role_id` | `INT` | FOREIGN KEY (roles.id), NULL | The role assigned to approve this step. |
-
-*   **Table: `form_fields`**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the form field. |
-| `template_id` | `INT` | FOREIGN KEY (workflow_templates.id) | Links the field to a workflow template. |
-| `field_label` | `VARCHAR(255)` | NOT NULL | The text displayed to the user for this field. |
-| `field_type` | `ENUM('text', 'textarea', 'number', 'date', 'file')` | NOT NULL | The type of input control to render. |
-| `is_required` | `BOOLEAN` | NOT NULL, DEFAULT FALSE | Whether the user must fill this field. |
+#### **2.3 Responsive Design Requirements**
+The application must be fully responsive and provide an optimal user experience on desktops, tablets, and mobile devices. A mobile-first design approach will be used, ensuring core functionality is accessible on smaller screens. Layouts will adapt fluidly to different screen sizes using flexible grids and media queries.
 
 ---
 
-#### **TASK 2: Approval Request Submission (Requester Functionality)**
+### **3. BACKEND ARCHITECTURE**
 
-##### **3.2.1 Description and Priority**
-**Description:** This feature allows a standard user (Requester) to initiate a new approval process. They select an available workflow template, fill in the required data and attach files, and submit it for approval.
-**Priority:** High
+#### **3.1 API Specifications and Endpoints**
+The backend will expose a RESTful API for all frontend communications. Authentication will be managed via JWTs sent in the Authorization header.
 
-##### **3.2.2 UI/UX Design (Frontend)**
-*   **Dashboard View:** The user's dashboard will have a primary section titled "My Requests," showing a table of their submitted requests with columns for `Request ID`, `Template Name`, `Submitted Date`, and `Status` (e.g., Pending, Approved, Rejected).
-*   **Initiation:** A "New Request" button will be clearly visible. Clicking it opens a modal or a new page.
-*   **Template Selection:** The user is presented with a list of available (active) workflow templates to choose from.
-*   **Request Form:** After selecting a template, the system dynamically renders the form based on the `form_fields` defined by the admin. The UI will display all fields with their respective labels and input types. Required fields will be marked with an asterisk (*). A file upload component will be present for fields of type 'file'.
-*   **Submission:** A "Submit Request" button at the bottom. Upon clicking, the form is validated. If successful, the request is submitted, and the user is redirected to their dashboard with a success message.
+| Method | Endpoint                               | Description                                      |
+| :----- | :------------------------------------- | :----------------------------------------------- |
+| POST   | `/api/auth/register`                   | Register a new user.                             |
+| POST   | `/api/auth/login`                      | Authenticate a user and return a JWT.            |
+| GET    | `/api/projects`                        | Get all projects for the authenticated user.     |
+| POST   | `/api/projects`                        | Create a new project.                            |
+| GET    | `/api/projects/:id`                    | Get details of a specific project.               |
+| PUT    | `/api/projects/:id`                    | Update a project's details.                      |
+| DELETE | `/api/projects/:id`                    | Delete a project.                                |
+| GET    | `/api/projects/:projectId/tasks`       | Get all tasks within a specific project.         |
+| POST   | `/api/projects/:projectId/tasks`       | Create a new task within a project.              |
+| PUT    | `/api/tasks/:taskId`                   | Update a task's details (status, assignee, etc.).|
+| DELETE | `/api/tasks/:taskId`                   | Delete a task.                                   |
 
-##### **3.2.3 API Endpoints (Backend)**
+#### **3.2 Business Logic Implementation**
+*   **User Authentication:** User registration will hash passwords using bcrypt. Login will validate credentials and issue a signed JWT with a limited expiry. Middleware will protect routes by verifying the JWT on incoming requests.
+*   **Task Management Logic:**
+    *   Task creation requires a valid `projectId`.
+    *   Task status updates will be broadcast in real-time to all connected clients viewing that project (using WebSockets/Socket.io).
+    *   Permissions for updating or deleting a task will be restricted to the task assignee, the project owner, or a user with a "Project Manager" role.
+*   **Role-Based Access Control (RBAC):**
+    *   **Team Member:** Can view projects/tasks and update tasks assigned to them.
+    *   **Project Manager:** Can create/update/delete tasks within their projects and manage project members.
+    *   **Admin:** Global access to manage all users and projects.
 
-| Method | Endpoint | Description |
+#### **3.3 Integration Points**
+The system will be architected to support future integrations. Placeholder modules will be created for:
+*   **Google Calendar:** An API endpoint (`/api/integrations/google/sync`) will be stubbed out to handle future OAuth 2.0 flow and sync task due dates to a user's Google Calendar.
+*   **Slack:** A webhook handler will be designed to post notifications to a Slack channel when a task is created or its status changes.
+
+---
+
+### **4. DATABASE DESIGN**
+
+#### **4.1 Database Tables (Collections) with Schema**
+A NoSQL database (MongoDB) will be used. Data will be organized into the following collections:
+
+*   **`users` Collection**
+| Field | Data Type | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/requests` | Submits a new request. Body includes `template_id` and a JSON object of the form data. |
-| `GET` | `/api/v1/requests/my-requests` | Retrieves a list of all requests submitted by the currently logged-in user. |
-| `GET` | `/api/v1/requests/{id}` | Retrieves the detailed view of a specific request submitted by the user. |
-| `GET` | `/api/v1/workflows` | Retrieves a list of all active workflow templates available for the user to start. |
+| `_id` | ObjectId | Unique identifier for the user. |
+| `name` | String | User's full name. |
+| `email` | String | User's email address (unique). |
+| `password` | String | Hashed user password. |
+| `createdAt` | Timestamp | Date and time of registration. |
 
-##### **3.2.4 Database Design**
+*   **`projects` Collection**
+| Field | Data Type | Description |
+| :--- | :--- | :--- |
+| `_id` | ObjectId | Unique identifier for the project. |
+| `name` | String | Name of the project. |
+| `description` | String | Detailed description of the project. |
+| `owner` | ObjectId | Reference to the `users` collection (_id of the creator). |
+| `members` | Array of ObjectId | List of user IDs who are members of the project. |
+| `createdAt` | Timestamp | Date and time of project creation. |
 
-*   **Table: `requests`**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the request instance. |
-| `template_id` | `INT` | FOREIGN KEY (workflow_templates.id) | The template this request is based on. |
-| `requester_id` | `INT` | FOREIGN KEY (users.id) | The user who submitted the request. |
-| `status` | `ENUM('pending', 'approved', 'rejected', 'cancelled')` | NOT NULL, DEFAULT 'pending' | The overall status of the request. |
-| `current_step` | `INT` | NOT NULL, DEFAULT 1 | The current approval step the request is at. |
-| `created_at` | `TIMESTAMP` | DEFAULT CURRENT_TIMESTAMP | Timestamp of submission. |
-| `updated_at` | `TIMESTAMP` | ON UPDATE CURRENT_TIMESTAMP | Timestamp of the last action. |
+*   **`tasks` Collection**
+| Field | Data Type | Description |
+| :--- | :--- | :--- |
+| `_id` | ObjectId | Unique identifier for the task. |
+| `title` | String | The title of the task. |
+| `description` | String | A detailed description of the task. |
+| `status` | String | Current status ('To Do', 'In Progress', 'Done'). |
+| `priority` | String | Priority level ('Low', 'Medium', 'High'). |
+| `projectId` | ObjectId | Reference to the `projects` collection. |
+| `assignee` | ObjectId | Reference to the `users` collection (_id of the assigned user). |
+| `dueDate` | Date | The deadline for the task. |
+| `createdAt` | Timestamp | Date and time of task creation. |
 
-*   **Table: `request_data`**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the data entry. |
-| `request_id` | `INT` | FOREIGN KEY (requests.id) | Links this data to a specific request. |
-| `field_id` | `INT` | FOREIGN KEY (form_fields.id) | The form field this data corresponds to. |
-| `field_value` | `TEXT` | NOT NULL | The value entered by the user. For files, this would store the file path. |
+#### **4.2 Data Flow Diagrams**
+*   **User Registration:** User submits registration form -> Frontend sends POST to `/api/auth/register` -> Backend validates data, hashes password -> Backend creates a new document in the `users` collection -> Backend returns success message.
+*   **Task Creation:** User clicks "Add Task" in a project -> Frontend sends POST to `/api/projects/:projectId/tasks` with task data -> Backend middleware verifies user has permission for that project -> Backend creates a new document in the `tasks` collection with a reference to the `projectId` -> Backend returns the new task object to the frontend.
+
+#### **4.3 Data Migration Strategy**
+As this is a new system, no initial data migration is required. For future schema changes, versioned migration scripts will be developed to update the database structure and/or data programmatically, ensuring no data loss.
 
 ---
 
-#### **TASK 3: Request Processing (Approver Functionality)**
+### **5. NON-FUNCTIONAL REQUIREMENTS**
 
-##### **3.3.1 Description and Priority**
-**Description:** This feature enables an Approver to view, analyze, and act upon requests that are pending their decision. They can approve or reject a request, which either moves the request to the next step or terminates the workflow.
-**Priority:** High
+#### **5.1 Performance Metrics**
+*   **API Response Time:** 95% of all API calls should complete in under 200ms.
+*   **Page Load Time:** The initial application load (Dashboard) should be fully interactive in under 2 seconds on a standard broadband connection.
+*   **Real-time Synchronization:** Task status changes should be reflected across all active clients viewing the same project within 500ms.
 
-##### **3.3.2 UI/UX Design (Frontend)**
-*   **Dashboard/Inbox View:** The Approver's dashboard will feature an "Inbox" or "Pending My Approval" section. This will be a table listing all requests awaiting their action. Columns will include `Request ID`, `Requester Name`, `Template Name`, and `Received Date`.
-*   **Detailed Request View:** Clicking on a request opens a detailed, read-only view.
-    *   **Top Section:** Displays key information: Requester, Submission Date, and Current Status.
-    *   **Middle Section:** Shows all the data submitted by the requester in a clean, easy-to-read format. Any attached files will be available as downloadable links.
-    *   **Bottom Section:** An "Action" panel with "Approve" and "Reject" buttons. A `Comments` textarea is provided for the approver to add remarks.
-    *   **History/Audit Trail:** A timeline view showing the history of the request (e.g., "Submitted by John Doe," "Approved by Jane Smith - Step 1").
+#### **5.2 Security Requirements**
+*   **Data in Transit:** All communication between the client and server must be encrypted using SSL/TLS (HTTPS).
+*   **Data at Rest:** All sensitive user data, particularly passwords, must be hashed. Database-level encryption will be enabled for the entire dataset.
+*   **Authentication & Authorization:** Access will be controlled by JWT-based authentication and a robust RBAC system.
+*   **Input Validation:** All data submitted by users must be sanitized on the backend to prevent common vulnerabilities like Cross-Site Scripting (XSS) and NoSQL injection.
 
-##### **3.3.3 API Endpoints (Backend)**
+#### **5.3 Scalability Considerations**
+*   **Stateless Backend:** The Node.js backend will be designed to be stateless, allowing for horizontal scaling by running multiple instances behind a load balancer.
+*   **Database Scaling:** MongoDB will be configured in a replica set for high availability and can be sharded in the future to distribute the data load across multiple servers as the user base grows.
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/v1/approvals/pending` | Retrieves a list of all requests pending the current user's approval. |
-| `POST` | `/api/v1/approvals/{requestId}/approve` | Approves a request. The backend logic handles moving to the next step or marking as fully approved. |
-| `POST` | `/api/v1/approvals/{requestId}/reject` | Rejects a request. The backend logic updates the status and notifies the requester. |
+---
 
-##### **3.3.4 Database Design**
+### **6. IMPLEMENTATION TIMELINE**
 
-*   **Table: `request_history` (Audit Trail)**
-| Column Name | Data Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT` | PRIMARY KEY, AUTO_INCREMENT | Unique identifier for the history log entry. |
-| `request_id` | `INT` | FOREIGN KEY (requests.id) | The request this log entry belongs to. |
-| `user_id` | `INT` | FOREIGN KEY (users.id) | The user who performed the action. |
-| `action` | `ENUM('submitted', 'approved', 'rejected', 'commented')` | NOT NULL | The type of action performed. |
-| `comment` | `TEXT` | NULL | Any comments added during the action. |
-| `step` | `INT` | NULL | The workflow step at which the action occurred. |
-| `created_at` | `TIMESTAMP` | DEFAULT CURRENT_TIMESTAMP | Timestamp of the action. |
+The project is estimated to take **14 weeks** from start to deployment.
 
-*(Note: The `requests` and `request_data` tables from Task 2 are also heavily used by this feature.)*
+| Phase | Description | Duration | Key Milestones |
+| :---- | :---------- | :------- | :------------- |
+| **1** | **Project Setup & Backend Foundation** | **4 Weeks** | - Project repositories (Git) and CI/CD pipeline setup.<br>- Database schema finalized and implemented.<br>- User authentication (register/login) and authorization (RBAC) APIs complete. |
+| **2** | **Core Feature Development** | **6 Weeks** | - CRUD APIs for Projects and Tasks complete.<br>- Frontend development for all screens (Dashboard, Project View, etc.).<br>- Frontend connected to all backend APIs.<br>- Real-time updates via WebSockets implemented. |
+| **3** | **Testing & Refinement** | **3 Weeks** | - Unit, integration, and end-to-end (E2E) testing cycles.<br>- Bug fixing and performance optimization.<br>- UI/UX refinement based on internal feedback. |
+| **4** | **Deployment & Launch** | **1 Week** | - Final E2E testing on a staging environment.<br>- Production environment setup and configuration.<br>- Deployment to production server.<br>- Go-live. |
 
-### **4. Non-Functional Requirements**
-
-#### **4.1 Performance**
-*   Web pages shall load in under 3 seconds.
-*   API responses for data queries shall be returned in under 500ms under normal load.
-*   The system should support at least 100 concurrent users without significant degradation in performance.
-
-#### **4.2 Security**
-*   All user passwords must be hashed and salted.
-*   The system must implement Role-Based Access Control (RBAC) to ensure users can only access data and functionality appropriate for their role.
-*   All data transmission between the client and server will be encrypted using TLS/SSL.
-*   The system shall be protected against common web vulnerabilities such as SQL Injection, Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF).
-
-#### **4.3 Scalability**
-The application architecture should be designed to allow for horizontal scaling (adding more servers) to handle increased load in the future.
-
-#### **4.4 Usability**
-*   The user interface must be intuitive and require minimal training for new users.
-*   The system must provide clear feedback to users after they perform an action (e.g., success messages, validation errors).
-*   The UI shall be responsive and usable on standard desktop, tablet, and mobile browsers.
-
-#### **4.5 Reliability**
-*   The system should have an uptime of 99.5% or higher.
-*   A proper backup and recovery mechanism for the database must be in place to prevent data loss.
+#### **Dependencies and Critical Path**
+*   **Dependencies:** Phase 2 is dependent on the completion of the backend foundation in Phase 1. Phase 3 is dependent on the completion of all core features in Phase 2.
+*   **Resource Allocation:**
+    *   1 Project Manager
+    *   1 Backend Developer (Node.js)
+    *   1 Frontend Developer (React)
+    *   1 QA Engineer
+*   **Critical Path:** The critical path follows the sequential development and testing of the core application logic: **Backend Foundation -> Core Feature API Development -> Frontend Integration -> End-to-End Testing -> Deployment**. A delay in any of these stages will directly impact the final delivery date.

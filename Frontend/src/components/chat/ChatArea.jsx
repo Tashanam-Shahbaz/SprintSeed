@@ -31,9 +31,9 @@ const ChatArea = ({ messages }) => {
         </div>
       ) : (
         <div className="max-w-4xl mx-auto">
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <ChatMessage
-              key={index}
+              key={message.id || message.timestamp}
               message={message}
               isUser={message.isUser}
             />

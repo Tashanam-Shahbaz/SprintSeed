@@ -63,12 +63,15 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
             type="button"
             onClick={() => setSelectedModel(model)}
             className={cn(
-              "model-tag px-3 py-1 rounded-full text-xs font-medium border transition",
+              "model-tag px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-200 transform",
               selectedModel?.model_id === model.model_id
-                ? "bg-accent text-white border-accent"
-                : "bg-muted text-muted-foreground hover:bg-muted/70"
+                ? "bg-accent text-white border-accent shadow-lg scale-105 ring-2 ring-accent/20"
+                : "bg-muted text-muted-foreground border-muted hover:bg-muted/70 hover:border-accent/50 hover:scale-102"
             )}
           >
+            {selectedModel?.model_id === model.model_id && (
+              <span className="mr-2">✓</span>
+            )}
             {model.display_model_name}
           </button>
         ))}
