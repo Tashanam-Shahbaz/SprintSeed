@@ -209,12 +209,36 @@ class DB:
             finally:
                 self.close_connection_and_cursor(connection, cursor)
 
+    def insert_project(self, project_id: str, project_name : str ,  conversation_id: str):
+        """Insert a new project into the database if it does not already exist."""
+        try:
+            # Check if project exists
+            check_query = f"""
+                SELECT 1 FROM {self.schema}.projects WHERE project_id = %s
+            """
+            exists = self.retrieve_data(check_query, (project_id,))
+            if exists:
+                logger.info(f"Project already exists: {project_id}")
+                return
+
+            # Insert if not exists
+            insert_query = f"""
+                INSERT INTO {self.schema}.projects (project_id, project_name, created_at)
+                VALUES (%s, %s , CURRENT_TIMESTAMP)
+            """
+            data = (project_id, project_name)
+            self.execute_query(insert_query, data)
+            logger.info(f"Project inserted successfully: {project_id}")
+        except Exception as e:
+            logger.error(f"Error inserting project: {e}")
+            raise Exception(f"Error inserting project: {e}")
+    
     def insert_conversation(self, conversation_id: str, project_id: str, chat_type: str):
         """Insert a new conversation into the database if it does not already exist."""
         try:
             # Check if conversation exists
-            check_query = """
-                SELECT 1 FROM task_management.conversation WHERE conversation_id = %s
+            check_query = f"""
+                SELECT 1 FROM {self.schema}.conversation WHERE conversation_id = %s
             """
             exists = self.retrieve_data(check_query, (conversation_id,))
             if exists:
@@ -222,8 +246,8 @@ class DB:
                 return
 
             # Insert if not exists
-            insert_query = """
-                INSERT INTO task_management.conversation (conversation_id, project_id, chat_type, created_at)
+            insert_query = f"""
+                INSERT INTO {self.schema}.conversation (conversation_id, project_id, chat_type, created_at)
                 VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
             """
             data = (conversation_id, project_id, chat_type)
@@ -241,8 +265,8 @@ class DB:
             """
             attachment_ids = []
             
-            attachment_query ="""
-                    INSERT INTO task_management.conversation_attachment 
+            attachment_query =f"""
+                    INSERT INTO {self.schema}.conversation_attachment 
                     (attachment_id, conversation_id, file_name, file_type, file_size, file_content, created_at, is_deleted) 
                     VALUES
                     """
@@ -270,7 +294,49 @@ class DB:
         except Exception as e:
             logger.error(f"Error saving file attachments: {e}")
             raise Exception(f"Error saving file attachments: {e}")
+
+    def read_files(self, file_ids: List[str]) -> str:
+        """
+        Read file contents from the database based on provided file IDs.
+        Returns a string containing the concatenated file contents.
+        """
+        try:
+            if not file_ids:
+                return ''
+            
+            query = f"""
+                SELECT file_name , file_content FROM {self.schema}.conversation_attachment 
+                WHERE attachment_id = ANY(%s) AND is_deleted = FALSE
+            """
+            result = self.retrieve_data(query, (file_ids,))
+            file_content = ""
+            for file_info in result:
+                file_content += f"File Name: {file_info[0]}\nContent:\n{file_info[1]}\n\n"
+            
+            return file_content
         
+        except Exception as e:
+            logger.error(f"Error reading files: {e}")
+            raise Exception(f"Error reading files: {e}")
+        
+
+
+    def insert_conversation_message(self, conversation_id: str, user_query: str, agent_response: str, model_id: str, model_type: str):
+        """Insert a new conversation message into the database."""
+        try:
+            message_id = str(uuid.uuid4())
+            insert_query = f"""
+                INSERT INTO {self.schema}.conversation_message 
+                (message_id , conversation_id, user_query, agent_response, model_id, model_type, created_at) 
+                VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+            """
+            data = (message_id , conversation_id, user_query, agent_response, model_id, model_type)
+            self.execute_query(insert_query, data)
+            logger.info(f"Conversation message inserted successfully: {conversation_id}")
+        except Exception as e:
+            logger.error(f"Error inserting conversation message: {e}")
+            return
+                
     def get_all_llm_models(self):
         try:
             query = """

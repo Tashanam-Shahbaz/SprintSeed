@@ -7,7 +7,9 @@ from datetime import datetime
 import uuid
 import traceback
 from typing import List, Optional
-from models import UserRegisterRequest, UserLogin
+from models import (
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest
+)
 
 
 from utils.chat_history_manager import ChatHistoryManager
@@ -92,128 +94,7 @@ def demo(request: Request):
         logger.error(f"Error in demo endpoint: {str(e)}")
         return handle_api_error(e)
 
-@app.post("/upload-files")
-def upload_files(
-    request: Request,
-    project_id: str = Form(...),
-    conversation_id: str = Form(...),
-    chat_type : str = Form(default="srs_creator"),
-    files: Optional[List[UploadFile]] = File(None) 
-):
-    try:
-        if not files:
-            raise HTTPException(status_code=400, detail="No files uploaded")
-        
-        # Process the uploaded files
-        processed_files = process_files_for_storage(files)
-        
-        if not processed_files:
-            raise HTTPException(status_code=400, detail="No valid files processed")
-        
-        db_obj.insert_conversation(
-            conversation_id=conversation_id,
-            project_id=project_id,
-            chat_type=chat_type
-        )
-        # Save file attachments
-        attachment_ids = db_obj.save_file_attachments(conversation_id, processed_files)
-        
-        
-        # Prepare response data
-        response_data = {
-           "attachment_ids": attachment_ids,
-        }
-        
-        return JSONResponse(content=response_data, status_code=200)
-   
-    except HTTPException as he:
-        # Re-raise HTTP exceptions
-        raise he
-    except Exception as e:
-        logger.error(f"Error uploading files: {str(e)}")
-        return handle_api_error(e)
 
-@app.post("/generate-srs-proposal")
-def generate_srs_proposal(
-    request: Request,
-    project_id: str = Form(...),
-    model_type: str = Form(default="openai"),
-    model_id: str = Form(default="gpt-4o"),
-    temperature: Optional[float] = Form(default=0.2),
-    user_query: str = Form(...)
-    # files: Optional[List[UploadFile]] = File(None),
-    ):
-    try:
-
-        history = ChatHistoryManager(session_id=project_id)
-        user_and_agent_chat_message = history.create_proposal_user_message_string()
-
-
-        #Read Files
-        # file_text = process_files_for_storage(files)
-        file_text = ''
-        # Initialize research agent
-        proposal_generator_agent_obj = SRSCreatorAgent()
-        
-        def stream_proposal():
-            accumulated_proposal = ""
-            first_chunk = True
-            last_chunk = None
-
-            try:
-                for chunk in proposal_generator_agent_obj.generate_srs_document(
-                    chat_history = user_and_agent_chat_message,
-                    user_query = user_query,
-                    model_type = model_type , 
-                    temperature = temperature,
-                    model_id = model_id,
-                    file_text = file_text
-                ):
-                    if first_chunk:
-                        first_chunk = False
-                        temp = chunk
-                        chunk = chunk.replace("```string", "", 1).replace("```", "", 1).lstrip()
-
-                    if last_chunk is not None:
-                        # print("chunk ", last_chunk)
-                        yield f"data: {last_chunk}\n\n"
-                        accumulated_proposal += last_chunk
-
-                    last_chunk = chunk
-
-                if last_chunk:
-                    last_chunk = last_chunk.rstrip("```")
-                    # print("chunk ", last_chunk)
-                    yield f"data: {last_chunk}\n\n"
-                    accumulated_proposal += last_chunk
-                
-                # logger.log(message=f"SRS document streamed. accumulated_proposal {accumulated_proposal}", log_level="INFO")
-                with open("SRS document.txt", "w", encoding='utf-8') as file:
-                    file.write(accumulated_proposal)
-
-                # Store chat history after streaming completes
-                history.store_proposal_chat_history(
-                    user_query=user_query, 
-                    agent_response=accumulated_proposal
-                )
-
-
-            except Exception as e:
-                yield f"data: {handle_streaming_error(e)}\n\n"
-            
-        return StreamingResponse(stream_proposal(), media_type="text/event-stream")
-
-    except Exception as e:
-        # logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
-        return handle_api_error(e)
-    
-# Middleware to log all requests
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    logger.info(f"Request: {request.method} {request.url.path}")
-    response = await call_next(request)
-    logger.info(f"Response status code: {response.status_code}")
-    return response
 
 #Register API
 @app.post("/register")
@@ -364,6 +245,156 @@ async def get_roles():
 
     except Exception as e:
         return handle_api_error(e)
+
+
+@app.post("/create-project")
+def create_project(
+    request: Request,creat_project: CreateProjectRequest):
+    try:
+        # Insert Project and Conversation
+        db_obj.insert_project(
+            project_id=creat_project.project_id,
+            project_name=creat_project.project_name, 
+            conversation_id=creat_project.conversation_id
+        )
+        
+        db_obj.insert_conversation(
+            conversation_id=creat_project.conversation_id,
+            project_id=creat_project.project_id,
+            chat_type=creat_project.chat_type
+        )
+        
+        return JSONResponse(content={"message": "Project created successfully"}, status_code=200)
+    
+    except Exception as e:
+        logger.error(f"Error creating project: {str(e)}")
+        return handle_api_error(e)
+    
+
+@app.post("/upload-files")
+def upload_files(
+    requet: Request,
+    project_id: str = Form(...),
+    conversation_id: str = Form(...),
+    chat_type : str = Form(default="srs_creator"),
+    files: Optional[List[UploadFile]] = File(None) 
+):
+    try:
+        if not files:
+            raise HTTPException(status_code=400, detail="No files uploaded")
+        
+        # Process the uploaded files
+        processed_files = process_files_for_storage(files)
+        
+        if not processed_files:
+            raise HTTPException(status_code=400, detail="No valid files processed")
+        
+        db_obj.insert_conversation(
+            conversation_id=conversation_id,
+            project_id=project_id,
+            chat_type=chat_type
+        )
+        # Save file attachments
+        attachment_ids = db_obj.save_file_attachments(conversation_id, processed_files)
+        
+        
+        # Prepare response data
+        response_data = {
+           "attachment_ids": attachment_ids,
+        }
+        
+        return JSONResponse(content=response_data, status_code=200)
+   
+    except HTTPException as he:
+        # Re-raise HTTP exceptions
+        raise he
+    except Exception as e:
+        logger.error(f"Error uploading files: {str(e)}")
+        return handle_api_error(e)
+
+@app.post("/generate-srs-proposal")
+def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
+    try:
+
+        history = ChatHistoryManager(session_id=agent_request.project_id)
+        user_and_agent_chat_message = history.create_proposal_user_message_string()
+
+        #Insert Project and Conversation
+        db_obj.insert_project(
+            project_id=agent_request.project_id,
+            project_name=agent_request.project_name, 
+            conversation_id=agent_request.conversation_id
+        )
+
+        #Read Files
+        file_text = db_obj.read_files(
+            file_ids=agent_request.file_ids,
+        )
+
+        # Initialize research agent
+        proposal_generator_agent_obj = SRSCreatorAgent()
+        
+        def stream_proposal():
+            accumulated_proposal = ""
+            first_chunk = True
+            last_chunk = None
+
+            try:
+                for chunk in proposal_generator_agent_obj.generate_srs_document(
+                    chat_history = user_and_agent_chat_message,
+                    user_query = agent_request.user_query,
+                    model_type = agent_request.model_type , 
+                    temperature = agent_request.temperature,
+                    model_id = agent_request.model_id,
+                    file_text = file_text
+                ):
+                    if first_chunk:
+                        first_chunk = False
+                        temp = chunk
+                        chunk = chunk.replace("```string", "", 1).replace("```", "", 1).lstrip()
+
+                    if last_chunk is not None:
+                        # print("chunk ", last_chunk)
+                        yield f"data: {last_chunk}\n\n"
+                        accumulated_proposal += last_chunk
+
+                    last_chunk = chunk
+
+                if last_chunk:
+                    last_chunk = last_chunk.rstrip("```")
+                    # print("chunk ", last_chunk)
+                    yield f"data: {last_chunk}\n\n"
+                    accumulated_proposal += last_chunk
+                
+                # logger.log(message=f"SRS document streamed. accumulated_proposal {accumulated_proposal}", log_level="INFO")
+                with open("SRS document.txt", "w", encoding='utf-8') as file:
+                    file.write(accumulated_proposal)
+
+                # Store chat history after streaming completes
+                history.store_proposal_chat_history(
+                    user_query=agent_request.user_query, 
+                    agent_response=accumulated_proposal
+                )
+
+
+                db_obj.insert_conversation_message(
+                    conversation_id=agent_request.conversation_id,
+                    user_query=agent_request.user_query,
+                    agent_response=accumulated_proposal,
+                    model_id=agent_request.model_id,
+                    model_type = agent_request.model_type,
+                )
+
+
+            except Exception as e:
+                yield f"data: {handle_streaming_error(e)}\n\n"
+            
+        return StreamingResponse(stream_proposal(), media_type="text/event-stream")
+
+    except Exception as e:
+        # logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
+        return handle_api_error(e)
+    
 @app.get("/models")
 async def get_models():
     try:
