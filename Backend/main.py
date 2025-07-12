@@ -364,8 +364,34 @@ async def get_roles():
 
     except Exception as e:
         return handle_api_error(e)
+@app.get("/models")
+async def get_models():
+    try:
+        models = db_obj.get_all_llm_models()  
 
+        model_list = [
+            {
+                "model_id": model[0],
+                "display_model_name": model[1],
+                "model_name": model[2],
+                "model_type": model[3],
+                "context_window": model[4],
+                "max_token": model[5],
+                "location": model[6],
+                "is_image_support": model[7],
+                "is_deleted": model[8],
+                "created_at": model[9].strftime('%Y-%m-%d %H:%M:%S')
+            }
+            for model in models
+        ]
 
+        return JSONResponse(
+            content={"status": "success", "models": model_list},
+            status_code=200
+        )
+
+    except Exception as e:
+        return handle_api_error(e)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)

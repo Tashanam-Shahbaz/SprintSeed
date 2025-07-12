@@ -14,7 +14,7 @@ model_dict_static = [
     },
     {
         "model_name": "gemini-1.5-pro-001",
-        "model_type": "google",
+        "model_type": "google_genai",
         "max_token": 8192,
         "context_window": 2000000,
         "location": "us-central1",
@@ -22,7 +22,7 @@ model_dict_static = [
     },
     {
         "model_name": "gemini-1.5-pro-002",
-        "model_type": "google",
+        "model_type": "google_genai",
         "max_token": 8192,
         "context_window": 2000000,
         "location": "us-central1",
@@ -30,7 +30,7 @@ model_dict_static = [
     },
     {
         "model_name": "gemini-1.5-flash-001",
-        "model_type": "google",
+        "model_type": "google_genai",
         "max_token": 8192,
         "context_window": 1000000,
         "location": "us-central1",
@@ -38,7 +38,7 @@ model_dict_static = [
     },
     {
         "model_name": "gemini-1.5-flash-002",
-        "model_type": "google",
+        "model_type": "google_genai",
         "max_token": 8192,
         "context_window": 1000000,
         "location": "us-central1",
@@ -46,7 +46,7 @@ model_dict_static = [
     },
     {
             "model_name": "gemini-2.0-flash-exp",
-            "model_type": "google", 
+            "model_type": "google_genai", 
             "max_token": 8192, 
             "context_window": 1048576,  #Autual context window 1048576
             "location": "us-central1",
@@ -94,7 +94,7 @@ model_dict_static = [
       },
     {
     "model_name": "gemini-2.0-flash-thinking-exp",
-    "model_type": "google",
+    "model_type": "google_genai",
     "max_token": 64000,
     "context_window": 1000000,
     "location": "us-central1",
@@ -109,8 +109,8 @@ model_dict_static = [
         "is_image_support": True,
     },
         {
-        "model_name": "gemini-2.5-flash-preview-04-17",
-        "model_type": "google",
+        "model_name": "gemini-2.5-flash",
+        "model_type": "google_genai",
         "max_token": 64000,
         "context_window": 1000000,
         "location": "us-central1",

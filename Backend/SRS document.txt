@@ -1,271 +1,462 @@
-# Software Requirements Specification (SRS) for Personal Portfolio Website
+Okay, you've asked for "FSD" again, and previously an SRS document was provided. A Software Requirements Specification (SRS) outlines *what* the system should do, while a Functional Specification Document (FSD) often elaborates on *how* those functions will be implemented from a user and system interaction perspective, detailing features, user flows, and business rules. They are closely related and often overlap significantly, with an FSD sometimes being a more detailed follow-up to an SRS, or a combined document.
 
-## 1. Introduction
+Given your repeated request, I will generate a document that serves as a **Functional Specification Document (FSD)** for the "Online Library System", building upon the functional requirements previously outlined and adding more detail on the functional design.
 
-### 1.1 Purpose
-This document outlines the requirements for developing a personal portfolio website that will showcase the user's professional background, skills, projects, and contact information.
+---
 
-### 1.2 Scope
-The personal portfolio website will serve as an online resume and project showcase, allowing potential employers, clients, or collaborators to learn about the user's qualifications and work.
+# Functional Specification Document (FSD)
 
-### 1.3 Definitions, Acronyms, and Abbreviations
-- SRS: Software Requirements Specification
-- UI: User Interface
-- UX: User Experience
-- CMS: Content Management System
-- SEO: Search Engine Optimization
+## Project: Online Library System
 
-## 2. Overall Description
-
-### 2.1 Product Perspective
-The portfolio website will be a standalone web application accessible via standard web browsers on desktop and mobile devices.
-
-### 2.2 Product Features
-- Professional profile presentation
-- Skills and expertise showcase
-- Project portfolio with descriptions and visuals
-- Contact information and form
-- Resume/CV download option
-- Social media integration
-
-### 2.3 User Classes and Characteristics
-- Primary users: Potential employers, clients, and collaborators
-- Secondary users: The portfolio owner (for updates and maintenance)
-
-### 2.4 Operating Environment
-- Web browsers: Chrome, Firefox, Safari, Edge (latest 2 versions)
-- Devices: Desktop, tablet, and mobile devices
-- Operating systems: Windows, macOS, iOS, Android
-
-### 2.5 Design and Implementation Constraints
-- Responsive design for all screen sizes
-- Accessibility compliance (WCAG 2.1 AA)
-- Fast loading times (under 3 seconds)
-- SEO-friendly structure
-
-## 3. Specific Requirements
-
-### 3.1 External Interface Requirements
-
-#### 3.1.1 User Interfaces
-- Home/Landing page with professional introduction
-- About Me section with detailed biography
-- Skills section displaying technical and soft skills
-- Projects section with filterable portfolio items
-- Contact section with form and direct contact options
-- Navigation menu (responsive for mobile devices)
-- Footer with essential links and copyright information
-
-#### 3.1.2 Hardware Interfaces
-- No specific hardware interfaces required beyond standard input devices
-
-#### 3.1.3 Software Interfaces
-- Content Management System (optional)
-- Form submission and email service
-- Analytics integration (e.g., Google Analytics)
-
-### 3.2 Functional Requirements
-
-#### 3.2.1 Home/Landing Page
-- FR-1.1: Display professional photo/avatar
-- FR-1.2: Present concise professional headline/tagline
-- FR-1.3: Provide brief introduction
-- FR-1.4: Include call-to-action buttons for key sections
-
-#### 3.2.2 About Me Section
-- FR-2.1: Display detailed professional biography
-- FR-2.2: List education background
-- FR-2.3: Show work experience timeline
-- FR-2.4: Present personal interests and values (optional)
-
-#### 3.2.3 Skills Section
-- FR-3.1: Display technical skills with proficiency indicators
-- FR-3.2: Show soft skills and competencies
-- FR-3.3: Include certifications and credentials
-- FR-3.4: Organize skills by categories
-
-#### 3.2.4 Projects Section
-- FR-4.1: Display project cards with images and brief descriptions
-- FR-4.2: Provide detailed project information on click/tap
-- FR-4.3: Include links to live projects and/or repositories
-- FR-4.4: Allow filtering projects by category/technology
-- FR-4.5: Show project timeline and role information
-
-#### 3.2.5 Contact Section
-- FR-5.1: Provide contact form with name, email, subject, and message fields
-- FR-5.2: Display direct email address (with anti-spam protection)
-- FR-5.3: Show phone number (optional)
-- FR-5.4: Include social media profile links
-- FR-5.5: Implement form validation and submission confirmation
-
-#### 3.2.6 General Features
-- FR-6.1: Provide downloadable resume/CV
-- FR-6.2: Implement responsive navigation menu
-- FR-6.3: Include search functionality (optional)
-- FR-6.4: Support dark/light theme toggle (optional)
-
-### 3.3 Non-Functional Requirements
-
-#### 3.3.1 Performance
-- NFR-1.1: Page load time under 3 seconds on standard connections
-- NFR-1.2: Optimize images and assets for fast loading
-- NFR-1.3: Implement lazy loading for images and content below the fold
-
-#### 3.3.2 Security
-- NFR-2.1: Implement HTTPS for secure connections
-- NFR-2.2: Protect contact form against spam and abuse
-- NFR-2.3: Secure personal information display
-
-#### 3.3.3 Usability
-- NFR-3.1: Intuitive navigation structure
-- NFR-3.2: Consistent design language throughout the site
-- NFR-3.3: Clear typography with appropriate contrast
-- NFR-3.4: Meaningful error messages and user feedback
-
-#### 3.3.4 Accessibility
-- NFR-4.1: Comply with WCAG 2.1 AA standards
-- NFR-4.2: Provide alternative text for all images
-- NFR-4.3: Ensure keyboard navigation support
-- NFR-4.4: Maintain appropriate color contrast ratios
-
-#### 3.3.5 SEO
-- NFR-5.1: Implement proper meta tags and descriptions
-- NFR-5.2: Use semantic HTML structure
-- NFR-5.3: Create XML sitemap
-- NFR-5.4: Ensure mobile-friendly design (Google mobile-first indexing)
-
-## 4. System Features and Requirements
-
-### 4.1 System Features
-- Content management capability (optional)
-- Analytics tracking
-- Form submission handling
-- File download functionality
-- Responsive image handling
-
-### 4.2 System Requirements
-
-#### 4.2.1 Development Requirements
-- Modern HTML5, CSS3, and JavaScript
-- Front-end framework options: React, Vue, Angular, or static HTML/CSS
-- Version control system (Git recommended)
-- Build and deployment pipeline
-
-#### 4.2.2 Hosting Requirements
-- Web hosting service with HTTPS support
-- Domain name registration
-- Sufficient bandwidth for expected traffic
-- Regular backup system
-
-## 5. Appendices
-
-### 5.1 Assumptions and Dependencies
-- User will provide all necessary content (text, images, project details)
-- User has access to hosting and domain services
-- Portfolio will be updated periodically to reflect new projects and skills
-
-### 5.2 Future Enhancements
-- Blog/article section
-- Testimonials from clients/employers
-- Interactive project demonstrations
-- Multilingual support
-- Advanced analytics dashboard# Software Requirements Specification (SRS) Document
-
-## Table of Contents
-1. Introduction
-   - Purpose
-   - Scope
-   - Definitions, Acronyms, and Abbreviations
-   - References
-   - Overview
-2. Overall Description
-   - Product Perspective
-   - Product Functions
-   - User Characteristics
-   - Constraints
-   - Assumptions and Dependencies
-3. Specific Requirements
-   - User Interface Requirements
-   - Functional Requirements
-   - Non-functional Requirements
-   - System Features
-4. Appendices
+## Version: 1.0
+## Date: October 26, 2023
 
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-The purpose of this Software Requirements Specification (SRS) document is to define the requirements for a user interface (UI) guidance system. This system will assist users in understanding and navigating the UI effectively.
+The purpose of this Functional Specification Document (FSD) is to detail the functional requirements and design of the Online Library System. It describes the system's features, user interactions, business rules, and data flows, providing a clear understanding of the system's intended behavior. This document serves as a guide for development, testing, and stakeholder review, ensuring alignment between business needs and system implementation.
 
 ### 1.2 Scope
-This document covers the requirements for a UI guidance system that will provide users with instructions and support related to user interface elements. The system will be applicable to various applications and platforms.
+The Online Library System is a web-based application designed to facilitate the management of library resources and user interactions. Its primary functions include resource cataloging, user management, searching, borrowing, returning, reservation, and notification services. This FSD focuses on the core functionalities required for the initial release.
 
-### 1.3 Definitions, Acronyms, and Abbreviations
-- **UI**: User Interface
-- **SRS**: Software Requirements Specification
-- **ISD**: Instructional System Design
+### 1.3 Audience
+This document is intended for:
+*   **Developers**: To understand the system's functional design for implementation.
+*   **Testers**: To create test cases and validate system behavior against specified functions.
+*   **Project Managers**: To oversee the development process and ensure scope adherence.
+*   **Stakeholders**: To review and approve the functional design.
 
-### 1.4 References
-- ISD preparation materials
-- Cable theory resources:
-  - [YouTube Video on Cable Theory](https://www.youtube.com/watch?v=Pwpg0wg1xc0)
-  - [ResearchGate Publication on Passive Cable Modeling](https://www.researchgate.net/publication/297734232_Passive_Cable_Modeling)
-  - [Springer Article on Cable Theory](https://link.springer.com/article/10.1007/BF00317936)
-  - [Wikipedia Article on Cable Theory](https://en.wikipedia.org/wiki/Cable_theorys)
+### 1.4 Definitions, Acronyms, and Abbreviations
+*   **FSD**: Functional Specification Document
+*   **SRS**: Software Requirements Specification
+*   **Patron**: A registered user who borrows library resources.
+*   **Administrator**: A user with privileges to manage the library system.
+*   **ISBN**: International Standard Book Number
+*   **UI**: User Interface
+*   **UX**: User Experience
 
-### 1.5 Overview
-This document provides a detailed description of the UI guidance system, including its functionalities, user interface requirements, and constraints. It serves as a guide for developers and stakeholders involved in the project.
+### 1.5 References
+*   Online Library System - Software Requirements Specification (SRS) v1.0 (Previous document)
+*   Library Policy Handbook (Hypothetical)
 
-## 2. Overall Description
+## 2. System Overview
 
 ### 2.1 Product Perspective
-The UI guidance system is an independent module that can be integrated into existing applications to enhance user experience by providing intuitive guidance and support.
+The Online Library System is a standalone web application accessible via standard web browsers. It provides distinct interfaces and functionalities for two primary user roles: Patrons and Administrators. While future integrations with external systems (e.g., payment gateways, external bibliographic databases) are possible, they are out of scope for this initial FSD.
 
-### 2.2 Product Functions
-- Provide step-by-step guidance for navigating the UI.
-- Offer tips and best practices for using UI elements.
-- Support multimedia content such as videos and articles for in-depth understanding.
+### 2.2 High-Level Functions
+The system will provide the following high-level functions:
+*   **User Authentication & Authorization**: Secure login and role-based access.
+*   **Resource Catalog Management**: CRUD operations for library items.
+*   **Resource Search & Browse**: Efficient discovery of library materials.
+*   **Borrowing & Returning**: Core transaction management for resources.
+*   **Resource Reservation**: Queue management for unavailable items.
+*   **User Account Management**: Self-service for Patrons, administrative control for Admins.
+*   **Notifications**: Automated alerts for users.
+*   **Reporting**: Administrative insights into library operations.
 
-### 2.3 User Characteristics
-- Users with varying levels of technical expertise.
-- Users seeking assistance with UI navigation and understanding.
+### 2.3 User Roles and Responsibilities
+*   **Patron**:
+    *   Register and log in.
+    *   Search and browse library resources.
+    *   View resource details and availability.
+    *   Reserve unavailable resources.
+    *   View personal borrowing history, current borrowings, due dates, and fines.
+    *   Update personal profile information.
+*   **Administrator**:
+    *   Log in with administrative privileges.
+    *   Add, edit, and delete resources in the catalog.
+    *   Manage Patron and Administrator accounts (create, edit, deactivate).
+    *   Perform check-out and check-in operations for resources.
+    *   Manage fines.
+    *   Generate various operational reports.
+    *   Configure system settings (e.g., borrowing periods, fine rates).
 
-### 2.4 Constraints
-- The system must be compatible with multiple platforms and devices.
-- It should not interfere with the core functionalities of the host application.
+### 2.4 Assumptions and Constraints
+*   **Assumptions**:
+    *   Users have stable internet connectivity.
+    *   Library policies regarding borrowing periods, fines, and reservations are clearly defined and will be provided.
+    *   An existing database of resources and patrons may need to be migrated.
+*   **Constraints**:
+    *   Must be a web-based application.
+    *   Must support modern web browsers (Chrome, Firefox, Edge, Safari).
+    *   Adherence to data privacy regulations (e.g., GDPR, CCPA).
+    *   System must be scalable to handle future growth in users and resources.
 
-### 2.5 Assumptions and Dependencies
-- Users have access to the internet for accessing multimedia content.
-- The host application supports integration with external modules.
+## 3. Detailed Functional Requirements
 
-## 3. Specific Requirements
+This section details the specific functions of the system, including user interactions, business rules, and expected system responses.
 
-### 3.1 User Interface Requirements
-- The UI guidance system should have a user-friendly interface.
-- It should be easily accessible from the main application interface.
-- The system should support multimedia content display.
+### 3.1 User Management
 
-### 3.2 Functional Requirements
-- The system must provide real-time guidance based on user actions.
-- It should allow users to search for specific UI elements and receive guidance.
-- The system should track user progress and provide feedback.
+#### 3.1.1 Patron Registration
+*   **Description**: Allows new users to create a Patron account.
+*   **User Flow**:
+    1.  User navigates to the registration page.
+    2.  User provides unique email, password, and confirms password.
+    3.  User provides personal details (e.g., Name, Address, Phone Number).
+    4.  System validates input (e.g., email format, password strength, unique email).
+    5.  Upon successful validation, system creates Patron account and logs the user in or redirects to login.
+*   **Functional Requirements**:
+    *   **FSD-UM-001**: The system shall provide a web form for new Patron registration.
+    *   **FSD-UM-002**: The system shall validate that the provided email address is unique and in a valid format.
+    *   **FSD-UM-003**: The system shall enforce password complexity rules (e.g., minimum length, mix of characters).
+    *   **FSD-UM-004**: Upon successful registration, the system shall create a new Patron record with a default "Active" status.
 
-### 3.3 Non-functional Requirements
-- The system should have a response time of less than 2 seconds.
-- It should be scalable to accommodate a large number of users.
-- The system must ensure data privacy and security.
+#### 3.1.2 User Authentication (Login)
+*   **Description**: Allows registered Patrons and Administrators to log into the system.
+*   **User Flow**:
+    1.  User navigates to the login page.
+    2.  User enters email/username and password.
+    3.  System validates credentials against stored records.
+    4.  Upon successful login, system redirects user to their respective dashboard (Patron Dashboard or Admin Dashboard).
+    5.  Upon failed login, system displays an error message ("Invalid credentials").
+*   **Functional Requirements**:
+    *   **FSD-UM-005**: The system shall provide a login interface for all registered users.
+    *   **FSD-UM-006**: The system shall authenticate users based on their unique email/username and encrypted password.
+    *   **FSD-UM-007**: The system shall implement session management to maintain user login state.
+    *   **FSD-UM-008**: The system shall differentiate between Patron and Administrator roles upon successful login and direct them to appropriate interfaces.
 
-### 3.4 System Features
-- Interactive tutorials and walkthroughs.
-- Contextual help based on user actions.
-- Integration with external resources for additional learning.
+#### 3.1.3 Password Reset
+*   **Description**: Allows users to reset forgotten passwords.
+*   **User Flow**:
+    1.  User clicks "Forgot Password" link on login page.
+    2.  User enters their registered email address.
+    3.  System sends a password reset link to the email.
+    4.  User clicks the link, which directs them to a password reset form.
+    5.  User enters and confirms new password.
+    6.  System updates password and invalidates the reset link.
+*   **Functional Requirements**:
+    *   **FSD-UM-009**: The system shall provide a "Forgot Password" mechanism.
+    *   **FSD-UM-010**: The system shall send a unique, time-limited password reset link to the user's registered email.
+    *   **FSD-UM-011**: The system shall allow users to set a new password via the reset link.
 
-## 4. Appendices
-- Appendix A: Glossary
-- Appendix B: User Interface Mockups
-- Appendix C: Technical Specifications
+#### 3.1.4 Administrator Account Management
+*   **Description**: Administrators can manage other Administrator accounts.
+*   **User Flow (Admin)**:
+    1.  Admin logs in and navigates to "Admin Management" section.
+    2.  Admin can view a list of existing Admin accounts.
+    3.  Admin can click "Add New Admin", fill in details (username, password, name, email), and submit.
+    4.  Admin can click "Edit" next to an existing Admin, modify details, and save.
+    5.  Admin can click "Delete" next to an existing Admin (with confirmation).
+*   **Functional Requirements**:
+    *   **FSD-UM-012**: The system shall allow authorized Administrators to create new Administrator accounts.
+    *   **FSD-UM-013**: The system shall allow authorized Administrators to modify existing Administrator account details.
+    *   **FSD-UM-014**: The system shall allow authorized Administrators to deactivate or delete Administrator accounts (excluding their own).
+
+#### 3.1.5 Patron Account Management (Admin)
+*   **Description**: Administrators can view, edit, and deactivate Patron accounts.
+*   **User Flow (Admin)**:
+    1.  Admin logs in and navigates to "Patron Management" section.
+    2.  Admin can search for Patrons by name, email, or ID.
+    3.  Admin can view a list of Patrons with their status.
+    4.  Admin can click "Edit" next to a Patron, modify details (e.g., contact info, status), and save.
+    5.  Admin can change a Patron's status to "Deactivated" to prevent login.
+*   **Functional Requirements**:
+    *   **FSD-UM-015**: The system shall provide an interface for Administrators to search and view Patron accounts.
+    *   **FSD-UM-016**: The system shall allow Administrators to edit Patron profile information.
+    *   **FSD-UM-017**: The system shall allow Administrators to change a Patron's account status (e.g., Active, Deactivated).
+
+### 3.2 Resource Management
+
+#### 3.2.1 Add New Resource
+*   **Description**: Administrators can add new books, journals, or other library items to the catalog.
+*   **User Flow (Admin)**:
+    1.  Admin navigates to "Resource Management" -> "Add New Resource".
+    2.  Admin fills in resource details: Title, Author(s), ISBN, Publisher, Publication Year, Genre/Category, Number of Copies, Description.
+    3.  Admin submits the form.
+    4.  System validates input (e.g., ISBN format, required fields).
+    5.  Upon successful submission, system creates a new resource record and updates the catalog.
+*   **Functional Requirements**:
+    *   **FSD-RM-001**: The system shall provide a form for Administrators to add new resources.
+    *   **FSD-RM-002**: The system shall capture essential metadata for each resource (Title, Author, ISBN, Publisher, Pub Year, Genre, Copies, Description).
+    *   **FSD-RM-003**: The system shall automatically set the initial availability status for each copy based on the "Number of Copies" entered.
+
+#### 3.2.2 Edit Resource Details
+*   **Description**: Administrators can modify existing resource information.
+*   **User Flow (Admin)**:
+    1.  Admin navigates to "Resource Management" -> "View Resources".
+    2.  Admin searches or browses for the desired resource.
+    3.  Admin clicks "Edit" next to the resource.
+    4.  Admin modifies relevant fields and submits.
+    5.  System updates the resource record.
+*   **Functional Requirements**:
+    *   **FSD-RM-004**: The system shall allow Administrators to edit any detail of an existing resource.
+    *   **FSD-RM-005**: Changes to the "Number of Copies" shall automatically adjust the total available copies.
+
+#### 3.2.3 Delete Resource
+*   **Description**: Administrators can remove resources from the catalog.
+*   **User Flow (Admin)**:
+    1.  Admin navigates to "Resource Management" -> "View Resources".
+    2.  Admin searches or browses for the desired resource.
+    3.  Admin clicks "Delete" next to the resource.
+    4.  System prompts for confirmation.
+    5.  Upon confirmation, system removes the resource record.
+*   **Functional Requirements**:
+    *   **FSD-RM-006**: The system shall allow Administrators to delete resources.
+    *   **FSD-RM-007**: The system shall prevent deletion of resources that are currently borrowed or have outstanding reservations.
+
+### 3.3 Searching and Browsing
+
+#### 3.3.1 Resource Search
+*   **Description**: Allows users to find resources using various criteria.
+*   **User Flow**:
+    1.  User enters keywords into a search bar (e.g., "Harry Potter", "J.K. Rowling", "978-0747532743").
+    2.  User initiates search.
+    3.  System queries the resource catalog.
+    4.  System displays a list of matching resources, showing Title, Author, and current Availability.
+    5.  User can click on a search result to view detailed information.
+*   **Functional Requirements**:
+    *   **FSD-SB-001**: The system shall provide a universal search bar accessible from most pages.
+    *   **FSD-SB-002**: The system shall support searching by Title, Author, ISBN, and Keywords (within description/genre).
+    *   **FSD-SB-003**: Search results shall be displayed in a clear, paginated list, showing key information and availability status.
+    *   **FSD-SB-004**: Search results shall be sortable (e.g., by Title, Author, Publication Year).
+
+#### 3.3.2 Resource Browsing
+*   **Description**: Allows users to explore resources by predefined categories.
+*   **User Flow**:
+    1.  User navigates to the "Browse" section.
+    2.  User selects a category/genre (e.g., "Fiction", "Science", "History").
+    3.  System displays all resources belonging to that category.
+*   **Functional Requirements**:
+    *   **FSD-SB-005**: The system shall allow users to browse resources by predefined categories/genres.
+    *   **FSD-SB-006**: Categories shall be configurable by Administrators.
+
+#### 3.3.3 Resource Details View
+*   **Description**: Displays comprehensive information about a selected resource.
+*   **User Flow**:
+    1.  User clicks on a resource from search results or browse list.
+    2.  System displays a dedicated page for the resource.
+*   **Functional Requirements**:
+    *   **FSD-SB-007**: The system shall display full bibliographic details (Title, Author, ISBN, Publisher, Pub Year, Description, Genre).
+    *   **FSD-SB-008**: The system shall clearly indicate the total number of copies and the number of available copies.
+    *   **FSD-SB-009**: For Patrons, the page shall include options to "Reserve" (if unavailable) or indicate "Available for Borrowing".
+
+### 3.4 Borrowing and Returning
+
+#### 3.4.1 Check Out Resource (Admin Function)
+*   **Description**: Administrators record a resource being borrowed by a Patron.
+*   **User Flow (Admin)**:
+    1.  Admin navigates to "Borrowing/Returning" -> "Check Out".
+    2.  Admin enters Patron ID/Name and Resource ISBN/Title.
+    3.  System validates Patron and Resource availability.
+    4.  System displays confirmation details (Patron, Resource, calculated Due Date).
+    5.  Admin confirms check-out.
+    6.  System creates a borrowing record, updates resource availability, and sets the due date based on library policy (e.g., 14 days).
+*   **Functional Requirements**:
+    *   **FSD-BR-001**: The system shall allow Administrators to check out an available resource to an active Patron.
+    *   **FSD-BR-002**: The system shall automatically calculate and assign a due date for the borrowed resource.
+    *   **FSD-BR-003**: The system shall decrement the available copies count for the resource.
+    *   **FSD-BR-004**: The system shall prevent check-out if the resource has no available copies or the Patron is deactivated/has excessive fines.
+
+#### 3.4.2 Check In Resource (Admin Function)
+*   **Description**: Administrators record a resource being returned by a Patron.
+*   **User Flow (Admin)**:
+    1.  Admin navigates to "Borrowing/Returning" -> "Check In".
+    2.  Admin enters Resource ISBN/Title or scans barcode.
+    3.  System identifies the borrowing record.
+    4.  System calculates any overdue fines based on the due date and current date.
+    5.  System displays fine amount (if any) and confirms return.
+    6.  Admin confirms check-in.
+    7.  System closes the borrowing record, increments available copies, and records any fines.
+*   **Functional Requirements**:
+    *   **FSD-BR-005**: The system shall allow Administrators to check in a returned resource.
+    *   **FSD-BR-006**: The system shall automatically calculate fines for overdue items based on predefined daily rates.
+    *   **FSD-BR-007**: The system shall increment the available copies count for the resource.
+    *   **FSD-BR-008**: The system shall record the fine amount against the Patron's account.
+
+#### 3.4.3 Resource Reservation
+*   **Description**: Patrons can reserve a resource if all copies are currently borrowed.
+*   **User Flow (Patron)**:
+    1.  Patron views a resource details page where all copies are "Borrowed".
+    2.  Patron clicks "Reserve" button.
+    3.  System adds Patron to the reservation queue for that resource.
+    4.  System confirms reservation and indicates position in queue.
+*   **Functional Requirements**:
+    *   **FSD-BR-009**: The system shall allow logged-in Patrons to reserve a resource if no copies are currently available.
+    *   **FSD-BR-010**: The system shall maintain a queue for reservations, processing them in a First-In, First-Out (FIFO) manner.
+    *   **FSD-BR-011**: The system shall prevent a Patron from reserving a resource they currently have borrowed or already have reserved.
+
+#### 3.4.4 View Borrowing History & Current Loans (Patron)
+*   **Description**: Patrons can view their past and current borrowing activities.
+*   **User Flow (Patron)**:
+    1.  Patron logs in and navigates to "My Account" or "Dashboard".
+    2.  Patron selects "Current Loans" or "Borrowing History".
+    3.  System displays a list of currently borrowed items with due dates and a list of past borrowings.
+*   **Functional Requirements**:
+    *   **FSD-BR-012**: The system shall display a Patron's currently borrowed resources, including title, author, and due date.
+    *   **FSD-BR-013**: The system shall display a Patron's borrowing history, including title, author, borrowed date, and returned date.
+    *   **FSD-BR-014**: The system shall display any outstanding fines associated with the Patron's account.
+
+### 3.5 Notifications
+
+#### 3.5.1 Due Date Reminders
+*   **Description**: Automated email notifications sent to Patrons before a resource's due date.
+*   **Functional Requirements**:
+    *   **FSD-NT-001**: The system shall automatically send an email notification to Patrons X days (configurable, e.g., 3 days) before a borrowed resource's due date.
+    *   **FSD-NT-002**: The email shall include the resource title, due date, and Patron's name.
+
+#### 3.5.2 Reservation Ready Notification
+*   **Description**: Automated email notification when a reserved resource becomes available.
+*   **Functional Requirements**:
+    *   **FSD-NT-003**: The system shall automatically send an email notification to the next Patron in the reservation queue when a reserved resource becomes available.
+    *   **FSD-NT-004**: The notification shall inform the Patron that the resource is ready for pickup and specify a pickup deadline (e.g., 3 days).
+
+#### 3.5.3 Overdue Notifications
+*   **Description**: Automated email notifications for overdue items and accrued fines.
+*   **Functional Requirements**:
+    *   **FSD-NT-005**: The system shall automatically send an email notification to Patrons for overdue items, including the resource title, original due date, and current fine amount.
+    *   **FSD-NT-006**: These notifications shall be sent periodically (e.g., daily or weekly) until the item is returned or fine is paid.
+
+### 3.6 Reporting (Administrator)
+
+#### 3.6.1 Currently Borrowed Items Report
+*   **Description**: Provides a list of all resources currently checked out.
+*   **Functional Requirements**:
+    *   **FSD-RP-001**: The system shall allow Administrators to generate a report of all currently borrowed items.
+    *   **FSD-RP-002**: The report shall include Resource Title, ISBN, Borrowed By (Patron Name), Borrow Date, and Due Date.
+
+#### 3.6.2 Overdue Items Report
+*   **Description**: Provides a list of all resources that are past their due date.
+*   **Functional Requirements**:
+    *   **FSD-RP-003**: The system shall allow Administrators to generate a report of all overdue items.
+    *   **FSD-RP-004**: The report shall include Resource Title, ISBN, Borrowed By (Patron Name), Due Date, and calculated Fine Amount.
+
+#### 3.6.3 Popular Resources Report
+*   **Description**: Identifies resources that are frequently borrowed.
+*   **Functional Requirements**:
+    *   **FSD-RP-005**: The system shall allow Administrators to generate a report of popular resources based on borrowing frequency over a specified period.
+    *   **FSD-RP-006**: The report shall list resources by popularity rank, showing Title, Author, and total number of times borrowed.
+
+## 4. User Interface (UI) Requirements (Conceptual)
+
+This section outlines general principles and key screens for the user interface. Detailed wireframes and mockups would be developed in a separate UI/UX design phase.
+
+### 4.1 General UI Principles
+*   **Intuitive Navigation**: Clear menus and consistent layout for easy user flow.
+*   **Responsiveness**: UI adapts to various screen sizes (desktop, tablet, mobile).
+*   **Accessibility**: Adherence to WCAG guidelines for users with disabilities.
+*   **Feedback**: Clear visual and textual feedback for user actions (e.g., success messages, error messages, loading indicators).
+*   **Branding**: Consistent use of library branding elements (colors, logos).
+
+### 4.2 Key Screens/Pages
+*   **Login/Registration Page**: Simple forms with clear calls to action.
+*   **Patron Dashboard**:
+    *   Summary of current loans, due dates, and fines.
+    *   Quick links to search, borrowing history, and profile.
+    *   Personalized messages/notifications.
+*   **Administrator Dashboard**:
+    *   Overview of system statistics (e.g., total resources, active patrons, overdue items count).
+    *   Quick links to resource management, user management, and reports.
+*   **Search Results Page**:
+    *   Display of results with pagination.
+    *   Filters (e.g., by genre, availability).
+    *   Clickable resource titles leading to detail pages.
+*   **Resource Details Page**:
+    *   Comprehensive information display.
+    *   "Reserve" button (for Patrons, if applicable).
+    *   Availability status prominently displayed.
+*   **Borrowing/Returning Interface (Admin)**:
+    *   Dedicated forms for check-out and check-in.
+    *   Search/scan functionality for resources and patrons.
+    *   Confirmation screens with calculated due dates/fines.
+*   **User Profile Page (Patron)**:
+    *   View and edit personal information.
+    *   Change password.
+
+## 5. Data Model (Conceptual)
+
+This section provides a high-level overview of the main entities and their relationships within the system. A detailed database schema would be part of the technical design document.
+
+### 5.1 Key Entities
+*   **User**:
+    *   `UserID` (Primary Key)
+    *   `Email` (Unique)
+    *   `PasswordHash`
+    *   `FirstName`
+    *   `LastName`
+    *   `Role` (Patron, Administrator)
+    *   `Status` (Active, Deactivated)
+    *   `RegistrationDate`
+*   **Resource**:
+    *   `ResourceID` (Primary Key)
+    *   `Title`
+    *   `Author`
+    *   `ISBN` (Unique)
+    *   `Publisher`
+    *   `PublicationYear`
+    *   `Genre`
+    *   `TotalCopies`
+    *   `AvailableCopies`
+    *   `Description`
+*   **BorrowingTransaction**:
+    *   `TransactionID` (Primary Key)
+    *   `ResourceID` (Foreign Key to Resource)
+    *   `PatronID` (Foreign Key to User)
+    *   `BorrowDate`
+    *   `DueDate`
+    *   `ReturnDate` (Null if not returned)
+    *   `FineAmount` (Null if no fine)
+    *   `Status` (Borrowed, Returned, Overdue)
+*   **Reservation**:
+    *   `ReservationID` (Primary Key)
+    *   `ResourceID` (Foreign Key to Resource)
+    *   `PatronID` (Foreign Key to User)
+    *   `ReservationDate`
+    *   `Status` (Pending, ReadyForPickup, Cancelled, Fulfilled)
+    *   `QueuePosition`
+
+### 5.2 Relationships (High-Level)
+*   One `User` can have many `BorrowingTransaction`s.
+*   One `User` can have many `Reservation`s.
+*   One `Resource` can be part of many `BorrowingTransaction`s.
+*   One `Resource` can be part of many `Reservation`s.
+
+## 6. Non-Functional Requirements
+
+These requirements define the quality attributes of the system.
+
+*   **Performance**:
+    *   **FSD-NFR-001**: Page load times shall be under 3 seconds for 90% of requests under normal load (up to 100 concurrent users).
+    *   **FSD-NFR-002**: Search queries shall return results within 2 seconds.
+*   **Security**:
+    *   **FSD-NFR-003**: All user passwords shall be stored using strong, one-way hashing algorithms (e.g., bcrypt).
+    *   **FSD-NFR-004**: All data transmission between client and server shall be encrypted using HTTPS.
+    *   **FSD-NFR-005**: Role-based access control shall be strictly enforced for all administrative functions.
+    *   **FSD-NFR-006**: The system shall be protected against common web vulnerabilities (e.g., SQL Injection, XSS).
+*   **Usability**:
+    *   **FSD-NFR-007**: The UI shall be intuitive, requiring minimal training for Patrons.
+    *   **FSD-NFR-008**: Clear and concise error messages shall be provided for all user input errors and system failures.
+*   **Reliability**:
+    *   **FSD-NFR-009**: The system shall maintain an uptime of at least 99.5%.
+    *   **FSD-NFR-010**: Regular data backups shall be performed (e.g., daily).
+*   **Scalability**:
+    *   **FSD-NFR-011**: The system architecture shall support scaling to accommodate 10,000+ resources and 5,000+ active patrons without significant performance degradation.
+*   **Maintainability**:
+    *   **FSD-NFR-012**: The codebase shall be modular, well-documented, and adhere to established coding standards.
+
+## 7. Error Handling
+
+*   **General Principle**: The system shall provide user-friendly error messages that clearly explain the issue and, where possible, suggest corrective actions.
+*   **Specific Scenarios**:
+    *   **Invalid Input**: Display specific field validation errors (e.g., "Invalid email format", "Password too short").
+    *   **Duplicate Data**: Inform user if an email or ISBN already exists.
+    *   **Unauthorized Access**: Redirect to login or display an "Access Denied" message.
+    *   **System Errors**: Log detailed errors internally and display a generic, polite message to the user (e.g., "An unexpected error occurred. Please try again later.").
+
+## 8. Appendices
+
+### 8.1 Glossary
+*   **Online Library System**: The software application described in this document.
+*   **Resource**: Any item in the library collection (book, journal, etc.).
+*   **Borrowing**: The act of a Patron taking a resource from the library for a defined period.
+*   **Returning**: The act of a Patron bringing a borrowed resource back to the library.
+*   **Reservation**: A request by a Patron to borrow a resource that is currently unavailable.
+*   **Fine**: A penalty charged to a Patron for returning a resource after its due date.
+
+### 8.2 Index
+(Typically generated automatically by document processing software)
 
 ---
-
-This SRS document outlines the requirements for developing a UI guidance system that aims to improve user interaction and understanding of user interfaces across various applications.
