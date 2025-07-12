@@ -383,21 +383,22 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
         )
 
         #TODO
-        # return JSONResponse(content={"summary": response.get("")}, status_code=200)
-        subject = response.get("subject", "Summary of SRS Document")
-        body = response.get("body", "No content generated.")
-
-        # Step 5: Call your prebuilt send_email function
-        await send_email(
-            subject=subject,
-            body=body
-        )
-
-        # Step 6: Return success
+        subject = response.get("subject")
+        body = response.get("body")
         return JSONResponse(
-            content={"status": "success", "message": "Email summary sent successfully."},
+            content={
+                "subject": subject,
+                "body": body
+            },
             status_code=200
         )
+       
+       
+        # Step 6: Return success
+        # return JSONResponse(
+        #     content={"status": "success", "message": "Email summary sent successfully."},
+        #     status_code=200
+        # )
 
     except Exception as e:
         return JSONResponse(
