@@ -140,8 +140,8 @@ def generate_srs_proposal(
     model_type: str = Form(default="openai"),
     model_id: str = Form(default="gpt-4o"),
     temperature: Optional[float] = Form(default=0.2),
-    user_query: str = Form(...),
-    files: Optional[List[UploadFile]] = File(None),
+    user_query: str = Form(...)
+    # files: Optional[List[UploadFile]] = File(None),
     ):
     try:
 
@@ -150,8 +150,8 @@ def generate_srs_proposal(
 
 
         #Read Files
-        file_text = process_files_for_storage(files)
-
+        # file_text = process_files_for_storage(files)
+        file_text = ''
         # Initialize research agent
         proposal_generator_agent_obj = SRSCreatorAgent()
         
