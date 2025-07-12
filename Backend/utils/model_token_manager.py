@@ -204,7 +204,7 @@ def adjust_prompt_and_history_for_proposal(model_name, base_prompt, llm_response
                     
                     # Check if we can add LLM response
                     if llm_response:
-                        temp_prompt = f"{combined_prompt}\nPREVIOUS RESPONSE: {llm_response}"
+                        temp_prompt = f"{combined_prompt}\n<CHAT_HISTORY> {llm_response}</CHAT_HISTORY>" 
                         if number_of_tokens(temp_prompt) <= context_size:
                             final_prompt = temp_prompt
                             process_info["llm_response_included"] = True
@@ -215,7 +215,7 @@ def adjust_prompt_and_history_for_proposal(model_name, base_prompt, llm_response
 
         # If no datastore or datastore processing failed, try to include LLM response
         elif llm_response:
-            temp_prompt = f"{base_prompt}\nPREVIOUS RESPONSE: {llm_response}"
+            temp_prompt = f"{base_prompt}\n<CHAT_HISTORY>: {llm_response} </CHAT_HISTORY>"
             if number_of_tokens(temp_prompt) <= context_size:
                 final_prompt = temp_prompt
                 process_info["llm_response_included"] = True
@@ -225,7 +225,7 @@ def adjust_prompt_and_history_for_proposal(model_name, base_prompt, llm_response
         process_info["traceback"] = traceback.format_exc()
         # Fall back to base prompt + LLM response if everything else fails
         if llm_response:
-            temp_prompt = f"{base_prompt}\nPREVIOUS RESPONSE: {llm_response}"
+            temp_prompt = f"{base_prompt}\n<CHAT_HISTORY>: {llm_response}"
             if number_of_tokens(temp_prompt) <= context_size:
                 final_prompt = temp_prompt
                 process_info["llm_response_included"] = True
