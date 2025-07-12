@@ -5,7 +5,8 @@ import psycopg2
 import time
 from psycopg2 import OperationalError, InterfaceError
 from .shared import logger
-
+import uuid
+from typing import List, Dict, Any
 load_dotenv()
 
 MIN_CONNECTION = int(os.getenv("MIN_CONNECTION", 1))
@@ -207,3 +208,65 @@ class DB:
 
             finally:
                 self.close_connection_and_cursor(connection, cursor)
+
+    def insert_conversation(self, conversation_id: str, project_id: str, chat_type: str):
+        """Insert a new conversation into the database if it does not already exist."""
+        try:
+            # Check if conversation exists
+            check_query = """
+                SELECT 1 FROM task_management.conversation WHERE conversation_id = %s
+            """
+            exists = self.retrieve_data(check_query, (conversation_id,))
+            if exists:
+                logger.info(f"Conversation already exists: {conversation_id}")
+                return
+
+            # Insert if not exists
+            insert_query = """
+                INSERT INTO task_management.conversation (conversation_id, project_id, chat_type, created_at)
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+            """
+            data = (conversation_id, project_id, chat_type)
+            self.execute_query(insert_query, data)
+            logger.info(f"Conversation inserted successfully: {conversation_id}, {project_id}, {chat_type}")
+        except Exception as e:
+            logger.error(f"Error inserting conversation: {e}")
+            raise Exception(f"Error inserting conversation: {e}")
+        
+    def save_file_attachments(self , conversation_id: str, processed_files: List[Dict[str, Any]]) -> List[str]:
+        try:
+            """
+            Save file attachments to the database.
+            Returns a list of attachment IDs.
+            """
+            attachment_ids = []
+            
+            attachment_query ="""
+                    INSERT INTO task_management.conversation_attachment 
+                    (attachment_id, conversation_id, file_name, file_type, file_size, file_content, created_at, is_deleted) 
+                    VALUES
+                    """
+            for file_info in processed_files:
+                attachment_id = str(uuid.uuid4())
+                
+                # Insert the attachment record
+                attachment_query += """(%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, FALSE),"""
+                
+                attachment_data = (
+                    attachment_id, 
+                    conversation_id, 
+                    file_info["file_name"],
+                    file_info["file_type"],
+                    file_info["file_size"],
+                file_info["file_content"]
+                )
+                attachment_ids.append(attachment_id)
+
+            attachment_query = attachment_query[:-1]   
+            self.execute_query(attachment_query, attachment_data)
+            
+            
+            return attachment_ids
+        except Exception as e:
+            logger.error(f"Error saving file attachments: {e}")
+            raise Exception(f"Error saving file attachments: {e}")

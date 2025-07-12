@@ -1,7 +1,7 @@
 import os
 import tempfile
 from utils import logger
-from typing import List, Optional
+from typing import List, Optional , Dict, Any
 from fastapi import UploadFile
 import fitz  # PyMuPDF
 import pandas as pd
@@ -14,7 +14,7 @@ from langchain_community.document_loaders import (
     UnstructuredWordDocumentLoader,
     UnstructuredPowerPointLoader
 )
-
+import shutil
 
 
 def read_text_file(file_path):
@@ -124,39 +124,59 @@ def get_file_text(file_path="", extract_images=False, file_type=None):
             logger.error(f"Fallback loader failed for {file_path}: {fallback_error}")
             return ''
 
-def process_files_for_srs(files: Optional[List[UploadFile]]) -> str:
+def process_files_for_storage(files: List[UploadFile]) -> List[Dict[str, Any]]:
     """
-    Process uploaded files for SRS proposal generation.
-    Returns formatted text with document names and content.
+    Process uploaded files and prepare them for database storage.
+    Returns a list of dictionaries with file information.
     """
     if not files:
-        return ""
+        return []
     
-    all_documents_text = []
+    processed_files = []
     
     for file in files:
         try:
             # Create a temporary file to store the uploaded content
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as temp_file:
                 temp_file_path = temp_file.name
-                # Write the uploaded file content to the temporary file
-                content = file.read()
-                temp_file.write(content)
+                
+            # Write the uploaded file content to the temporary file using shutil
+            with open(temp_file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
             
             # Process the file based on its type
             file_type = file.filename.split('.')[-1].lower()
-            file_content = get_file_text(temp_file_path, extract_images=False, file_type=file_type)
             
-            # Format the document text as requested
-            formatted_text = f"Document Name: {file.filename}\nDocument Content:\n{file_content}\n\n"
-            all_documents_text.append(formatted_text)
+            # Get the file size
+            file_size = os.path.getsize(temp_file_path)
+            
+            # Read the file content as binary
+            with open(temp_file_path, "rb") as f:
+                file_binary = f.read()
+            
+            # Get the text content for display
+            try:
+                file_text = get_file_text(temp_file_path, extract_images=False, file_type=file_type)
+            except Exception as text_error:
+                logger.warning(f"Could not extract text from {file.filename}: {str(text_error)}")
+                file_text = "[Content extraction not supported for this file type]"
+            
+            # Add file information to the list
+            processed_files.append({
+                "file_name": file.filename,
+                "file_type": file.content_type or f"application/{file_type}",
+                "file_size": file_size,
+                "file_content": file_binary,  # Binary content for storage
+                "file_text": file_text        # Text content for display
+            })
             
             # Clean up the temporary file
             os.unlink(temp_file_path)
             
+            # Reset file pointer for potential reuse
+            file.file.seek(0)
+            
         except Exception as e:
-            logger.error(f"Error processing file {file.filename}: {e}")
-            all_documents_text.append(f"Document Name: {file.filename}\nError: Failed to process this document\n\n")
+            logger.error(f"Error processing file {file.filename}: {str(e)}")
     
-    # Combine all document texts
-    return "\n".join(all_documents_text)
+    return processed_files

@@ -12,7 +12,8 @@ from utils.chat_history_manager import ChatHistoryManager
 from agents.srs_creator_agent import SRSCreatorAgent
 
 
-from utils.helpers import process_files_for_srs
+from utils.helpers import  process_files_for_storage
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI): 
@@ -87,7 +88,46 @@ def demo(request: Request):
         logger.error(f"Error in demo endpoint: {str(e)}")
         return handle_api_error(e)
 
-
+@app.post("/upload-files")
+def upload_files(
+    request: Request,
+    project_id: str = Form(...),
+    conversation_id: str = Form(...),
+    chat_type : str = Form(default="srs_creator"),
+    files: Optional[List[UploadFile]] = File(None) 
+):
+    try:
+        if not files:
+            raise HTTPException(status_code=400, detail="No files uploaded")
+        
+        # Process the uploaded files
+        processed_files = process_files_for_storage(files)
+        
+        if not processed_files:
+            raise HTTPException(status_code=400, detail="No valid files processed")
+        
+        db_obj.insert_conversation(
+            conversation_id=conversation_id,
+            project_id=project_id,
+            chat_type=chat_type
+        )
+        # Save file attachments
+        attachment_ids = db_obj.save_file_attachments(conversation_id, processed_files)
+        
+        
+        # Prepare response data
+        response_data = {
+           "attachment_ids": attachment_ids,
+        }
+        
+        return JSONResponse(content=response_data, status_code=200)
+   
+    except HTTPException as he:
+        # Re-raise HTTP exceptions
+        raise he
+    except Exception as e:
+        logger.error(f"Error uploading files: {str(e)}")
+        return handle_api_error(e)
 
 @app.post("/generate-srs-proposal")
 def generate_srs_proposal(
@@ -106,7 +146,7 @@ def generate_srs_proposal(
 
 
         #Read Files
-        file_text = process_files_for_srs(files)
+        file_text = process_files_for_storage(files)
 
         # Initialize research agent
         proposal_generator_agent_obj = SRSCreatorAgent()
@@ -129,7 +169,6 @@ def generate_srs_proposal(
                         first_chunk = False
                         temp = chunk
                         chunk = chunk.replace("```string", "", 1).replace("```", "", 1).lstrip()
-                        logger.log(message=f"First chunk after: {chunk} First chunk before {temp}", log_level="INFO")
 
                     if last_chunk is not None:
                         # print("chunk ", last_chunk)
@@ -144,7 +183,7 @@ def generate_srs_proposal(
                     yield f"data: {last_chunk}\n\n"
                     accumulated_proposal += last_chunk
                 
-                logger.log(message=f"SRS document streamed. accumulated_proposal {accumulated_proposal}", log_level="INFO")
+                # logger.log(message=f"SRS document streamed. accumulated_proposal {accumulated_proposal}", log_level="INFO")
                 with open("SRS document.txt", "w", encoding='utf-8') as file:
                     file.write(accumulated_proposal)
 
@@ -161,7 +200,7 @@ def generate_srs_proposal(
         return StreamingResponse(stream_proposal(), media_type="text/event-stream")
 
     except Exception as e:
-        logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
+        # logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
         return handle_api_error(e)
     
 # Middleware to log all requests

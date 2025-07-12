@@ -124,11 +124,11 @@ CREATE TABLE IF NOT EXISTS task_management.conversation_message (
 -- Create conversation_attachment table for files attached to messages
 CREATE TABLE IF NOT EXISTS task_management.conversation_attachment (
     attachment_id VARCHAR(100) PRIMARY KEY,
-    message_id VARCHAR(100) REFERENCES task_management.conversation_message(message_id) ON DELETE CASCADE,
+    conversation_id VARCHAR(100) REFERENCES task_management.conversation(conversation_id) ON DELETE CASCADE,
     file_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(100) NOT NULL, -- MIME type
     file_size BIGINT NOT NULL, -- in bytes
-    file_path VARCHAR(1000) NOT NULL, -- Storage path
+    file_content TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE
 );
