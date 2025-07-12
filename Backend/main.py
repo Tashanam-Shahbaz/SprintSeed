@@ -8,7 +8,8 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
+    TaskCreatorAgentRequest
 )
 
 
@@ -16,7 +17,8 @@ from utils.chat_history_manager import ChatHistoryManager
 
 #Agents
 from agents.srs_creator_agent import SRSCreatorAgent
-
+from agents.task_planner_agent import TaskPlannerAgent
+# from agents.task_creator_agent import TaskCreatorAgent
 
 from utils.helpers import  process_files_for_storage
 
@@ -287,6 +289,12 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
             conversation_id=agent_request.conversation_id
         )
 
+        db_obj.insert_conversation(
+            conversation_id=agent_request.conversation_id,
+            project_id=agent_request.project_id,
+            chat_type=agent_request.chat_type
+        )
+
         #Read Files
         file_text = db_obj.read_files(
             file_ids=agent_request.file_ids,
@@ -353,7 +361,7 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         return StreamingResponse(stream_proposal(), media_type="text/event-stream")
 
     except Exception as e:
-        # logger.log(message=f"Unhandled error: {e}", log_level="ERROR")
+        # logger.log(message=f"Unhandled erragentor: {e}", log_level="ERROR")
         return handle_api_error(e)
     
 @app.get("/models")
@@ -383,7 +391,35 @@ async def get_models():
         )
 
     except Exception as e:
+        return handle_api_error(e)@app.post("/task-generator-agent")
+def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
+    try:
+
+        src_document = db_obj.get_finalize_srs(
+            project_id=agent_request. project_id,
+        )
+        task_generator = TaskPlannerAgent()
+        task_result = task_generator.generate_task_plan(
+            model_type=agent_request.model_type,
+            model_id=agent_request.model_id,
+            temperature=agent_request.temperature,
+            src_document=src_document
+        )
+
+        task = task_result.get("tasks", [])
+        db_obj.insert_task(
+            project_id=agent_request.project_id,
+            task_data=task
+        )
+        return JSONResponse(content=task_result, status_code=200)
+   
+    except HTTPException as he:
+        # Re-raise HTTP exceptions
+        raise he
+    except Exception as e:
+        logger.error(f"Error uploading files: {str(e)}")
         return handle_api_error(e)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)
