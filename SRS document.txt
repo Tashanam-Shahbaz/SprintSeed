@@ -1,12 +1,12 @@
-1.  **Project overview and scope:** Develop a minimal viable product (MVP) for a basic contact management web application, strictly limited to features achievable within a compressed 2-week timeline.
-2.  **Primary objectives and success criteria:** The primary objective is to deliver a functional, single-user contact list application within the 2-week deadline; success is defined by the successful deployment of core CRUD (Create, Read, Update, Delete) functionality for contacts.
-3.  **Key stakeholders and target users:** The key stakeholder is the project sponsor, and the target user is a single individual needing a simple, private digital address book.
-4.  **Core functional requirements:** The system will support creating a new contact (name, email, phone), viewing a list of all contacts, editing an existing contact's details, and deleting a contact.
-5.  **Technical stack recommendations:** Utilize a rapid development framework like React with a BaaS (Backend as a Service) like Firebase/Supabase to accelerate development and meet the aggressive timeline.
-6.  **Data management approach:** Employ a simple, non-relational database (e.g., Firestore, Supabase DB) with a single 'contacts' collection, with no complex relationships.
-7.  **Integration requirements with existing systems:** No external system integrations will be included in this 2-week scope to minimize complexity and risk.
-8.  **Security and compliance considerations:** Basic input validation and environment variable management for credentials will be implemented; no user authentication will be in scope for this MVP.
-9.  **Potential challenges or constraints:** The primary constraint is the extremely compressed 2-week timeline, which poses a significant risk to quality, testing, and feature completion.
-10. **Quality assurance approach:** QA will be limited to developer-led manual feature testing and basic unit tests; no dedicated QA cycle or automated end-to-end testing is feasible.
+1.  **Project Overview and Scope:** The project will create a Minimum Viable Product (MVP) of a "Project Launch Countdown" application, drastically reducing the feature set from an original 8-week plan to fit the new 2-week timeline.
+2.  **Primary Objectives and Success Criteria:** The sole objective is to deploy a core-functional application within 10 business days; success is defined by the live operation of the countdown timer and a basic task list.
+3.  **Key Stakeholders and Target Users:** Stakeholders are the project leadership team, and users are internal team members who need to track the launch date and associated tasks.
+4.  **Core Functional Requirements:** The system will feature a configurable countdown timer, a minimal CRUD (Create, Read, Update, Delete) task list, and a single-user authentication model.
+5.  **Technical Stack Recommendations:** A rapid-development stack like MERN (MongoDB, Express.js, React, Node.js) or a serverless framework is required to meet the deadline.
+6.  **Data Management Approach:** A simple NoSQL database will be used to store the target date, task items, and user credentials.
+7.  **Integration Requirements with Existing Systems:** All external integrations, such as advanced email notifications or calendar syncs from the original plan, will be postponed to a future version.
+8.  **Security and Compliance Considerations:** Basic security (HTTPS, password hashing) will be implemented, but comprehensive security audits are out of scope for this 2-week sprint.
+9.  **Potential Challenges or Constraints:** The primary constraint is the hyper-compressed 2-week timeline, which eliminates any buffer for unforeseen issues and mandates a ruthless reduction in scope and testing.
+10. **Quality Assurance Approach:** Testing will be limited to developer-led unit tests and a single, final user acceptance testing (UAT) session, forgoing any automated end-to-end or performance testing.
 
 [To generate the complete SRS document based on this plan, please reply with 'Generate SRS' or suggest changes to the points above.]
