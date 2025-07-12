@@ -8,7 +8,7 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest
 )
 
 
@@ -94,9 +94,33 @@ def demo(request: Request):
         logger.error(f"Error in demo endpoint: {str(e)}")
         return handle_api_error(e)
 
+@app.post("/create-project")
+def create_project(
+    request: Request,creat_project: CreateProjectRequest):
+    try:
+        # Insert Project and Conversation
+        db_obj.insert_project(
+            project_id=creat_project.project_id,
+            project_name=creat_project.project_name, 
+            conversation_id=creat_project.conversation_id
+        )
+        
+        db_obj.insert_conversation(
+            conversation_id=creat_project.conversation_id,
+            project_id=creat_project.project_id,
+            chat_type=creat_project.chat_type
+        )
+        
+        return JSONResponse(content={"message": "Project created successfully"}, status_code=200)
+    
+    except Exception as e:
+        logger.error(f"Error creating project: {str(e)}")
+        return handle_api_error(e)
+    
+
 @app.post("/upload-files")
 def upload_files(
-    request: Request,
+    requet: Request,
     project_id: str = Form(...),
     conversation_id: str = Form(...),
     chat_type : str = Form(default="srs_creator"),

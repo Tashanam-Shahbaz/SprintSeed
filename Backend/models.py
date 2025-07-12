@@ -33,3 +33,11 @@ class SRSGeneratorRequest(BaseModel):
     file_ids: Optional[List[str]] = Field(
         None, description="List of file paths to be processed for SRS generation"
     )
+
+class CreateProjectRequest(BaseModel):
+    project_id: str = Field(..., description="Unique identifier for the project")
+    project_name: str = Field(..., description="Name of the project")
+    conversation_id: Optional[str] = Field(
+        default_factory=lambda: str(uuid.uuid4()), description="Unique identifier for the conversation"
+    )
+    chat_type: str = Field(default="srs_creator", description="Type of chat for the project")

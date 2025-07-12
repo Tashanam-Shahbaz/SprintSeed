@@ -213,8 +213,8 @@ class DB:
         """Insert a new project into the database if it does not already exist."""
         try:
             # Check if project exists
-            check_query = """
-                SELECT 1 FROM task_management.project WHERE project_id = %s
+            check_query = f"""
+                SELECT 1 FROM {self.schema}.projects WHERE project_id = %s
             """
             exists = self.retrieve_data(check_query, (project_id,))
             if exists:
@@ -223,12 +223,12 @@ class DB:
 
             # Insert if not exists
             insert_query = f"""
-                INSERT INTO {self.schema}.projects (project_id, project_name ,conversation_id, created_at)
-                VALUES (%s, %s, %s , CURRENT_TIMESTAMP)
+                INSERT INTO {self.schema}.projects (project_id, project_name, created_at)
+                VALUES (%s, %s , CURRENT_TIMESTAMP)
             """
-            data = (project_id, project_name, conversation_id)
+            data = (project_id, project_name)
             self.execute_query(insert_query, data)
-            logger.info(f"Project inserted successfully: {project_id}, {conversation_id}")
+            logger.info(f"Project inserted successfully: {project_id}")
         except Exception as e:
             logger.error(f"Error inserting project: {e}")
             raise Exception(f"Error inserting project: {e}")
@@ -237,8 +237,8 @@ class DB:
         """Insert a new conversation into the database if it does not already exist."""
         try:
             # Check if conversation exists
-            check_query = """
-                SELECT 1 FROM task_management.conversation WHERE conversation_id = %s
+            check_query = f"""
+                SELECT 1 FROM {self.schema}.conversation WHERE conversation_id = %s
             """
             exists = self.retrieve_data(check_query, (conversation_id,))
             if exists:
@@ -246,8 +246,8 @@ class DB:
                 return
 
             # Insert if not exists
-            insert_query = """
-                INSERT INTO task_management.conversation (conversation_id, project_id, chat_type, created_at)
+            insert_query = f"""
+                INSERT INTO {self.schema}.conversation (conversation_id, project_id, chat_type, created_at)
                 VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
             """
             data = (conversation_id, project_id, chat_type)
@@ -265,8 +265,8 @@ class DB:
             """
             attachment_ids = []
             
-            attachment_query ="""
-                    INSERT INTO task_management.conversation_attachment 
+            attachment_query =f"""
+                    INSERT INTO {self.schema}.conversation_attachment 
                     (attachment_id, conversation_id, file_name, file_type, file_size, file_content, created_at, is_deleted) 
                     VALUES
                     """
@@ -325,8 +325,8 @@ class DB:
         """Insert a new conversation message into the database."""
         try:
             message_id = str(uuid.uuid4())
-            insert_query = """
-                INSERT INTO task_management.conversation_message 
+            insert_query = f"""
+                INSERT INTO {self.schema}.conversation_message 
                 (message_id , conversation_id, user_query, agent_response, model_id, model_type, created_at) 
                 VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
             """
