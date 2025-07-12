@@ -336,7 +336,55 @@ class DB:
         except Exception as e:
             logger.error(f"Error inserting conversation message: {e}")
             return
-        
+                
+    def get_all_llm_models(self):
+        try:
+            query = """
+                SELECT model_id, display_model_name, model_name, model_type, context_window, max_token, location, is_image_support, is_deleted, created_at
+                FROM task_management.llm_models
+                WHERE is_deleted = FALSE
+                ORDER BY created_at DESC
+            """
+            return self.retrieve_data(query=query)
+        except Exception as e:
+            logger.error(f"Error retrieving LLM models: {e}")
+            raise Exception("Failed to retrieve LLM models.")
+    def get_role_id_by_name(self, role_name: str):
+        query = """
+            SELECT role_id FROM task_management.roles WHERE role_name = %s
+        """
+        result = self.retrieve_data(query=query, data=(role_name,))
+        return result if result else None
+    def check_user_query(self, email: str) -> bool:
+        query = """
+            SELECT 1 FROM task_management.users WHERE email = %s
+        """
+        result = self.retrieve_data(query=query, data=(email,))
+        return result
+    def insert_user(self, user_data: tuple):
+        query = """
+            INSERT INTO task_management.users 
+            (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+        """
+        self.execute_query(query=query, data=user_data)
+
+    def get_user_by_email(self, email: str):
+        query = """
+            SELECT user_id, username, email, password, first_name, last_name, role_id 
+            FROM task_management.users 
+            WHERE email = %s
+        """
+        result = self.retrieve_data(query=query, data=(email,))
+        return result if result else None
+    def get_role(self):
+        query = """
+            SELECT role_id, role_name, description 
+            FROM task_management.roles
+        """
+        return self.retrieve_data(query=query)
+
+
     def get_finalize_srs(self, project_id: str) -> str:
         """Retrieve the final SRS from the conversation messages."""
         try:

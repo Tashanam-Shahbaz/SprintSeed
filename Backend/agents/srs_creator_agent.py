@@ -10,7 +10,11 @@ class SRSCreatorAgent(Agent, ABC):
     def generate_srs_document(self , chat_history,user_query  ,model_type ,  model_id , temperature , file_text):
         try:
             base_prompt = f"""
-            Analyse ths user query and chat history and generate a SRS document.
+            Analyse ths user query and chat history and generate a detailed SRS document. 
+            SRS document contain three major tasks and some other small descriptions too as in the SRS,
+            in those three main tasks the UI design description as frontend, UI related APIs as backend, 
+            Database related tables with a proper table format of data type and its use. 
+            All in descriptive and detailed and proper heading and table wise where its needed.
             <USER_QUERY> {user_query}</User_Query>
             """
 
