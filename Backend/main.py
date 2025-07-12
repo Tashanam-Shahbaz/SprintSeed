@@ -1,10 +1,14 @@
-from fastapi import FastAPI, HTTPException, Request, File, Form, UploadFile
+from fastapi import FastAPI, APIRouter,Request, Depends, HTTPException, Request, File, Form, UploadFile
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from utils import db_obj , logger
+from datetime import datetime
+import uuid
 import traceback
 from typing import List, Optional
+from models import UserRegisterRequest, UserLogin
+
 
 from utils.chat_history_manager import ChatHistoryManager
 
@@ -210,6 +214,156 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     logger.info(f"Response status code: {response.status_code}")
     return response
+
+#Register API
+@app.post("/register")
+async def register_user(payload: UserRegisterRequest):
+    try:
+        check_user_query = """
+            SELECT 1 FROM task_management.users 
+            WHERE username = %s OR email = %s
+        """
+        
+        existing_user = db_obj.retrieve_data(
+            query=check_user_query,
+            data=(payload.username, payload.email)
+        )
+
+        if existing_user:
+            return JSONResponse(
+                content={"status": "error", "message": "Username or email already exists"},
+                status_code=409
+            )
+
+        # insert_user_query = """
+        #     INSERT INTO task_management.users 
+        #     (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
+        #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+        # """
+
+        # 2. Fetch role_id using role_name
+        fetch_role_id_query = """
+            SELECT role_id FROM task_management.roles WHERE role_name = %s
+        """
+        role_result = db_obj.retrieve_data(
+            query=fetch_role_id_query,
+            data=(payload.role_name,)
+        )
+        if not role_result:
+            return JSONResponse(
+                content={"status": "error", "message": "Invalid role name"},
+                status_code=400
+            )
+        role_id = role_result[0][0]
+
+        # 3. Insert new user with the role_id
+        insert_user_query = """
+            INSERT INTO task_management.users 
+            (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+        """
+
+        user_id = str(uuid.uuid4())
+        password=payload.password
+
+        db_obj.execute_query(
+            query=insert_user_query,
+            data=(
+                user_id,
+                payload.username,
+                payload.email,
+                password,
+                payload.first_name,
+                payload.last_name,
+                role_id,
+                datetime.now(),
+                datetime.now()
+            )
+        )
+
+        return JSONResponse(
+            content={"status": "success", "message": "User registered successfully", "user_id": user_id},
+            status_code=201
+        )
+
+    except Exception as e:
+        return handle_api_error(e)
+    
+@app.post("/login")
+async def login_user(payload: UserLogin):
+    try:
+        fetch_user_query = """
+            SELECT user_id, username, email, password, first_name, last_name, role_id 
+            FROM task_management.users 
+            WHERE email = %s
+        """
+
+        result = db_obj.retrieve_data(
+            query=fetch_user_query,
+            data=(payload.email,)
+        )
+
+        if not result:
+            return JSONResponse(
+                content={"status": "error", "message": "User not found"},
+                status_code=404
+            )
+
+        user_row = result[0]
+        db_password = user_row[3]
+
+        if payload.password != db_password:
+            return JSONResponse(
+                content={"status": "error", "message": "Invalid password"},
+                status_code=401
+            )
+
+        return JSONResponse(
+            content={
+                "status": "success",
+                "message": "Login successful",
+                "user": {
+                    "user_id": user_row[0],
+                    "username": user_row[1],
+                    "email": user_row[2],
+                    "first_name": user_row[4],
+                    "last_name": user_row[5],
+                    "role_id": user_row[6],
+                }
+            },
+            status_code=200
+        )
+
+    except Exception as e:
+        return handle_api_error(e)
+
+
+@app.get("/roles")
+async def get_roles():
+    try:
+        fetch_roles_query = """
+            SELECT role_id, role_name, description 
+            FROM task_management.roles
+        """
+
+        roles = db_obj.retrieve_data(query=fetch_roles_query)
+
+        roles_list = [
+            {
+                "role_id": role[0],
+                "role_name": role[1],
+                "description": role[2]
+            }
+            for role in roles
+        ]
+
+        return JSONResponse(
+            content={"status": "success", "roles": roles_list},
+            status_code=200
+        )
+
+    except Exception as e:
+        return handle_api_error(e)
 
 
 if __name__ == "__main__":
