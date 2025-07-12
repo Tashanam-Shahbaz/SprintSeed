@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from utils import db_obj , logger
+from utils.sendEmail import send_email
 from datetime import datetime
 import uuid
 import traceback
@@ -227,8 +228,14 @@ def create_project(
             project_id=creat_project.project_id,
             chat_type=creat_project.chat_type
         )
-        
-        return JSONResponse(content={"message": "Project created successfully"}, status_code=200)
+        project_id=creat_project.project_id
+        return JSONResponse(
+            content={
+                "message": "Project created successfully",
+                "project_id": project_id
+            },
+            status_code=200
+        )
     
     except Exception as e:
         logger.error(f"Error creating project: {str(e)}")
@@ -378,11 +385,32 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
         )
         # Generate email summary
         response = email_summary_generator_agent.generate_summary(
-            agent_request.model_id, agent_request.temperature , src_document
+            agent_request.model_id, agent_request.model_type, agent_request.temperature , src_document
         )
 
         #TODO
-        return JSONResponse(content={"summary": response.get("")}, status_code=200)
+        subject = response.get("subject")
+        body = response.get("body")
+        return JSONResponse(
+            content={
+                "subject": subject,
+                "body": body
+            },
+            status_code=200
+        )
+       
+       
+        # Step 6: Return success
+        # return JSONResponse(
+        #     content={"status": "success", "message": "Email summary sent successfully."},
+        #     status_code=200
+        # )
+
+    except Exception as e:
+        return JSONResponse(
+            content={"status": "error", "message": f"Error sending email: {e}"},
+            status_code=500
+        )
 
 
     except Exception as e:
