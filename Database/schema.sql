@@ -183,3 +183,12 @@ INSERT INTO task_management.llm_models (
 (4,'Gemini 2.0 Flash Thinking', 'gemini-2.0-flash-thinking-exp', 'google_genai', 64000, 1000000, 'us-central1', TRUE),
 -- 5
 (5,'Gemini 2.5 Flash', 'gemini-2.5-flash', 'google_genai', 64000, 1000000, 'us-central1', TRUE)
+
+
+-- Add technical_requirements column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN technical_requirements TEXT;
+
+-- Add acceptance_criteria column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN acceptance_criteria TEXT
