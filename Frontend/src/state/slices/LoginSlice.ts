@@ -1,27 +1,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { api } from '../../utils/api';
+import {User , LoginCredentials} from '../../types/Login';
 
-// Types
 interface ApiError {
   response?: {
     data?: {
       message?: string;
     };
   };
-}
-
-export interface User {
-  user_id: string;
-  username: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  role_id?: number;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
 }
 
 export interface AuthState {
