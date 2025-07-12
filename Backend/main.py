@@ -392,6 +392,8 @@ async def get_models():
 
     except Exception as e:
         return handle_api_error(e)@app.post("/task-generator-agent")
+
+@app.get("/task_creation")
 def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
     try:
 
