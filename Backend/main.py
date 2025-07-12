@@ -299,54 +299,32 @@ async def login_user(payload: UserLogin):
         return handle_api_error(e)
 
 
-@app.post("/Roles")
-async def login_user(payload: UserLogin):
+@app.get("/roles")
+async def get_roles():
     try:
-        fetch_role_query = """
+        fetch_roles_query = """
             SELECT role_id, role_name, description 
             FROM task_management.roles
-            
         """
 
-        result = db_obj.retrieve_data(
-            query=fetch_role_query,
-            data=(payload.email,)
-        )
+        roles = db_obj.retrieve_data(query=fetch_roles_query)
 
-        if not result:
-            return JSONResponse(
-                content={"status": "error", "message": "User not found"},
-                status_code=404
-            )
-
-        user_row = result[0]
-        db_password = user_row[3]
-
-        if payload.password != db_password:
-            return JSONResponse(
-                content={"status": "error", "message": "Invalid password"},
-                status_code=401
-            )
+        roles_list = [
+            {
+                "role_id": role[0],
+                "role_name": role[1],
+                "description": role[2]
+            }
+            for role in roles
+        ]
 
         return JSONResponse(
-            content={
-                "status": "success",
-                "message": "Login successful",
-                "user": {
-                    "user_id": user_row[0],
-                    "username": user_row[1],
-                    "email": user_row[2],
-                    "first_name": user_row[4],
-                    "last_name": user_row[5],
-                    "role_id": user_row[6],
-                }
-            },
+            content={"status": "success", "roles": roles_list},
             status_code=200
         )
 
     except Exception as e:
         return handle_api_error(e)
-
 
 
 if __name__ == "__main__":
