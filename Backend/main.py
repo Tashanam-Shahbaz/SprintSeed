@@ -228,8 +228,14 @@ def create_project(
             project_id=creat_project.project_id,
             chat_type=creat_project.chat_type
         )
-        
-        return JSONResponse(content={"message": "Project created successfully"}, status_code=200)
+        project_id=creat_project.project_id
+        return JSONResponse(
+            content={
+                "message": "Project created successfully",
+                "project_id": project_id
+            },
+            status_code=200
+        )
     
     except Exception as e:
         logger.error(f"Error creating project: {str(e)}")
