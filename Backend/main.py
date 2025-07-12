@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from utils import db_obj , logger
 import traceback
-import logging
 from typing import List, Optional
 
 from utils.chat_history_manager import ChatHistoryManager
@@ -12,10 +11,8 @@ from utils.chat_history_manager import ChatHistoryManager
 #Agents
 from agents.srs_creator_agent import SRSCreatorAgent
 
-#Models
-from models import (
-    SRSGeneratorRequest
-)
+
+from utils.helpers import process_files_for_srs
 
 @asynccontextmanager
 async def lifespan(app: FastAPI): 
@@ -98,6 +95,7 @@ def generate_srs_proposal(
     project_id: str = Form(...),
     model_type: str = Form(default="openai"),
     model_id: str = Form(default="gpt-4o"),
+    temperature: Optional[float] = Form(default=0.2),
     user_query: str = Form(...),
     files: Optional[List[UploadFile]] = File(None),
     ):
@@ -105,6 +103,10 @@ def generate_srs_proposal(
 
         history = ChatHistoryManager(session_id=project_id)
         user_and_agent_chat_message = history.create_proposal_user_message_string()
+
+
+        #Read Files
+        file_text = process_files_for_srs(files)
 
         # Initialize research agent
         proposal_generator_agent_obj = SRSCreatorAgent()
@@ -116,7 +118,12 @@ def generate_srs_proposal(
 
             try:
                 for chunk in proposal_generator_agent_obj.generate_srs_document(
-                    llm_response=user_and_agent_chat_message,
+                    chat_history = user_and_agent_chat_message,
+                    user_query = user_query,
+                    model_type = model_type , 
+                    temperature = temperature,
+                    model_id = model_id,
+                    file_text = file_text
                 ):
                     if first_chunk:
                         first_chunk = False
@@ -164,3 +171,8 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     logger.info(f"Response status code: {response.status_code}")
     return response
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, port=8000)

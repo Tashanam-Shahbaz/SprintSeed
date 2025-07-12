@@ -25,7 +25,6 @@ class DB:
         self.max_retries = 3
         self.retry_delay = 3  # seconds
         self.init_connection_pool()
-        self.genai_type_id = self.get_genai_type_id()
 
     def init_connection_pool(self):
         try:
