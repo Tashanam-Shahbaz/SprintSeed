@@ -287,7 +287,8 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         db_obj.insert_project(
             project_id=agent_request.project_id,
             project_name=agent_request.project_name, 
-            conversation_id=agent_request.conversation_id
+            conversation_id=agent_request.conversation_id,
+            user_id=agent_request.user_id
         )
 
         db_obj.insert_conversation(
@@ -472,7 +473,8 @@ async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
 async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
     try:
         user_id = request.user_id
-        chat_details = db_obj.get_user_chat_details(user_id)
+        project_id = request.project_id
+        chat_details = db_obj.get_user_chat_details(user_id , project_id)
 
         if not chat_details:
             return JSONResponse(
