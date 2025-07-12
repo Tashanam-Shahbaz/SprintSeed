@@ -149,3 +149,12 @@ VALUES
   ('2', 'Frontend Developer', 'Responsible for UI/UX and client-side application development.'),
   ('3', 'Backend Developer', 'Handles server-side logic, database, and application integration.'),
   ('4', 'Database Manager', 'Manages the database schema, security, and data integrity.');
+
+
+-- Add technical_requirements column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN technical_requirements TEXT;
+
+-- Add acceptance_criteria column to tasks table
+ALTER TABLE task_management.tasks 
+ADD COLUMN acceptance_criteria TEXT

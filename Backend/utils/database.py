@@ -337,3 +337,82 @@ class DB:
             logger.error(f"Error inserting conversation message: {e}")
             return
         
+    def get_finalize_srs(self, project_id: str) -> str:
+        """Retrieve the final SRS from the conversation messages."""
+        try:
+
+            query = f"""
+                SELECT agent_response 
+                FROM {self.schema}.conversation_message cm
+                JOIN {self.schema}.conversation c ON cm.conversation_id = c.conversation_id
+                WHERE c.project_id = %s 
+                Order by cm.created_at DESC LIMIT 1"""
+            
+            result = self.retrieve_data(query, (project_id,))
+            if result:
+                return result[0][0]  # Return the agent response
+            return ""
+        except Exception as e:
+            logger.error(f"Error retrieving final SRS: {e}")
+            raise Exception(f"Error retrieving final SRS: {e}")
+
+    def insert_task(self, project_id: str, task_data: List[Dict[str, Any]]):
+        """
+        Insert multiple tasks into the tasks table using a single query with multiple value sets.
+        """
+        try:
+            if not task_data:
+                return []
+                
+            # Start building the query
+            insert_query = f"""
+                INSERT INTO {self.schema}.tasks (
+                    task_id, title, description, project_id, status, priority, complexity,
+                    estimated_hours, created_by, due_date, technical_requirements, acceptance_criteria, 
+                    created_at, updated_at
+                ) VALUES 
+            """
+            
+            # Collect all task IDs and prepare data tuples
+            task_ids = []
+            all_values = ()
+            
+            # Build the values part of the query and collect all data
+            for task in task_data:
+                # Generate task ID if not provided
+                task_id = task.get("id") or task.get("task_id") or f"TASK-{str(uuid.uuid4())[:8]}"
+                task_ids.append(task_id)
+                
+                # Add value placeholders for this task
+                insert_query += "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),"
+                
+                # Add actual values to the data tuple
+                task_values = (
+                    task_id,
+                    task.get("task_title") or task.get("title"),
+                    task.get("description"),
+                    project_id,
+                    task.get("status", "open"),
+                    task.get("priority", "medium"),
+                    task.get("complexity", "medium"),
+                    task.get("estimated_hours", 4),
+                    task.get("created_by"),
+                    task.get("due_date"),
+                    task.get("technical_requirements", ""),
+                    task.get("acceptance_criteria", "")
+                )
+                all_values += task_values
+            
+            # Remove the trailing comma
+            insert_query = insert_query[:-1]
+            
+            # Execute the query with all data
+            self.execute_query(insert_query, all_values)
+            logger.info(f"{len(task_data)} task(s) inserted successfully.")
+            
+            return task_ids
+            
+        except Exception as e:
+            logger.error(f"Error inserting tasks: {e}")
+            raise Exception(f"Error inserting tasks: {e}")
+
