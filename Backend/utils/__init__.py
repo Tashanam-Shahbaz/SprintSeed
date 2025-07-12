@@ -2,6 +2,8 @@ from .database import DB
 from .shared import logger
 import os
 
+redis_url = os.getenv("REDIS_URL")
+
 db_schema = os.getenv("DB_SCHEMA")
 db_host = os.getenv("DB_HOST")
 db_user = os.getenv("DB_USER")
