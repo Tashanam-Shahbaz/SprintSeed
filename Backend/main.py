@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="SprintSpeed", lifespan=lifespan)
 
-allow_origins=["http://localhost:3000"]
+allow_origins=["*"]
 
 app.add_middleware(
     CORSMiddleware,
