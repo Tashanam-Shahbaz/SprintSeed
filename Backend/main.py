@@ -100,15 +100,8 @@ def demo(request: Request):
 @app.post("/register")
 async def register_user(payload: UserRegisterRequest):
     try:
-        check_user_query = """
-            SELECT 1 FROM task_management.users 
-            WHERE username = %s OR email = %s
-        """
-        
-        existing_user = db_obj.retrieve_data(
-            query=check_user_query,
-            data=(payload.username, payload.email)
-        )
+       
+        existing_user=db_obj.check_user_query(payload.email)
 
         if existing_user:
             return JSONResponse(
@@ -116,20 +109,8 @@ async def register_user(payload: UserRegisterRequest):
                 status_code=409
             )
 
-        # insert_user_query = """
-        #     INSERT INTO task_management.users 
-        #     (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
-        #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
-        # """
-
-        # 2. Fetch role_id using role_name
-        fetch_role_id_query = """
-            SELECT role_id FROM task_management.roles WHERE role_name = %s
-        """
-        role_result = db_obj.retrieve_data(
-            query=fetch_role_id_query,
-            data=(payload.role_name,)
-        )
+       
+        role_result=db_obj.get_role_id_by_name(payload.role_name)
         if not role_result:
             return JSONResponse(
                 content={"status": "error", "message": "Invalid role name"},
@@ -137,31 +118,24 @@ async def register_user(payload: UserRegisterRequest):
             )
         role_id = role_result[0][0]
 
-        # 3. Insert new user with the role_id
-        insert_user_query = """
-            INSERT INTO task_management.users 
-            (user_id, username, email, password, first_name, last_name, role_id, created_at, updated_at, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, TRUE)
-        """
 
         user_id = str(uuid.uuid4())
-        password=payload.password
+        now = datetime.now()
 
-        db_obj.execute_query(
-            query=insert_user_query,
-            data=(
-                user_id,
-                payload.username,
-                payload.email,
-                password,
-                payload.first_name,
-                payload.last_name,
-                role_id,
-                datetime.now(),
-                datetime.now()
-            )
+        user_data = (
+            user_id,
+            payload.username,
+            payload.email,
+            payload.password,  
+            payload.first_name,
+            payload.last_name,
+            role_id,
+            now,
+            now
         )
-
+                
+        db_obj.insert_user(user_data)
+       
         return JSONResponse(
             content={"status": "success", "message": "User registered successfully", "user_id": user_id},
             status_code=201
@@ -173,16 +147,8 @@ async def register_user(payload: UserRegisterRequest):
 @app.post("/login")
 async def login_user(payload: UserLogin):
     try:
-        fetch_user_query = """
-            SELECT user_id, username, email, password, first_name, last_name, role_id 
-            FROM task_management.users 
-            WHERE email = %s
-        """
-
-        result = db_obj.retrieve_data(
-            query=fetch_user_query,
-            data=(payload.email,)
-        )
+        
+        result=db_obj.get_user_by_email(payload.email)
 
         if not result:
             return JSONResponse(
@@ -222,13 +188,8 @@ async def login_user(payload: UserLogin):
 @app.get("/roles")
 async def get_roles():
     try:
-        fetch_roles_query = """
-            SELECT role_id, role_name, description 
-            FROM task_management.roles
-        """
-
-        roles = db_obj.retrieve_data(query=fetch_roles_query)
-
+        
+        roles=db_obj.get_role()
         roles_list = [
             {
                 "role_id": role[0],

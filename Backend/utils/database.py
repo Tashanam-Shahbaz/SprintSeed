@@ -351,18 +351,16 @@ class DB:
             raise Exception("Failed to retrieve LLM models.")
     def get_role_id_by_name(self, role_name: str):
         query = """
-            SELECT role_id FROM task_management.roles 
-            WHERE role_name = %s
+            SELECT role_id FROM task_management.roles WHERE role_name = %s
         """
         result = self.retrieve_data(query=query, data=(role_name,))
-        return result[0][0] if result else None
-    def check_user_exists(self, email: str) -> bool:
+        return result if result else None
+    def check_user_query(self, email: str) -> bool:
         query = """
-            SELECT 1 FROM task_management.users 
-            WHERE email = %s
+            SELECT 1 FROM task_management.users WHERE email = %s
         """
-        result = self.retrieve_data(query=query, data=(email))
-        return bool(result)
+        result = self.retrieve_data(query=query, data=(email,))
+        return result
     def insert_user(self, user_data: tuple):
         query = """
             INSERT INTO task_management.users 
@@ -378,8 +376,8 @@ class DB:
             WHERE email = %s
         """
         result = self.retrieve_data(query=query, data=(email,))
-        return result[0] if result else None
-    def get_all_roles(self):
+        return result if result else None
+    def get_role(self):
         query = """
             SELECT role_id, role_name, description 
             FROM task_management.roles
