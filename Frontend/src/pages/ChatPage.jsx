@@ -7,9 +7,9 @@ import ChatInput from '../components/chat/ChatInput';
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
   const [chats, setChats] = useState([
-    { id: 1, title: 'Chat 1', isActive: true },
-    { id: 2, title: 'Chat 2', isActive: false },
-    { id: 3, title: 'Chat 3', isActive: false },
+    { id: 1, title: 'Chat 1', isActive: true, projectId: 'project-default-1' },
+    { id: 2, title: 'Chat 2', isActive: false, projectId: 'project-default-2' },
+    { id: 3, title: 'Chat 3', isActive: false, projectId: 'project-default-3' },
   ]);
 
   const [messages, setMessages] = useState([
@@ -40,13 +40,52 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleNewChat = () => {
-    const newChat = {
-      id: chats.length + 1,
-      title: `Chat ${chats.length + 1}`,
-      isActive: false
-    };
-    setChats(prev => [...prev, newChat]);
+  const handleNewChat = async () => {
+    try {
+      // Generate unique project ID
+      const projectId = `project-${Date.now()}`;
+      const projectName = `Project ${chats.length + 1}`;
+      
+      // Create project via API
+      const response = await fetch('http://localhost:8000/create-project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          project_id: projectId,
+          project_name: projectName,
+          conversation_id: projectId,
+          chat_type: "srs_document",
+          user_id: user?.id || "user-001"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create project');
+      }
+
+      const result = await response.json();
+      console.log('Project created successfully:', result);
+
+      // Add new chat to the list
+      const newChat = {
+        id: chats.length + 1,
+        title: projectName,
+        isActive: false,
+        projectId: projectId
+      };
+      setChats(prev => [...prev, newChat]);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      // Still add the chat locally even if API fails
+      const newChat = {
+        id: chats.length + 1,
+        title: `Chat ${chats.length + 1}`,
+        isActive: false
+      };
+      setChats(prev => [...prev, newChat]);
+    }
   };
 
   const handleChatSelect = (chatId) => {
