@@ -209,7 +209,7 @@ class DB:
             finally:
                 self.close_connection_and_cursor(connection, cursor)
 
-    def insert_project(self, project_id: str, project_name : str ,  conversation_id: str):
+    def insert_project(self, project_id: str, project_name : str ,  conversation_id: str , user_id : str ):
         """Insert a new project into the database if it does not already exist."""
         try:
             # Check if project exists
@@ -223,8 +223,8 @@ class DB:
 
             # Insert if not exists
             insert_query = f"""
-                INSERT INTO {self.schema}.projects (project_id, project_name, created_at)
-                VALUES (%s, %s , CURRENT_TIMESTAMP)
+                INSERT INTO {self.schema}.projects (project_id, project_name, created_by ,created_at )
+                VALUES (%s, %s , %s , CURRENT_TIMESTAMP)
             """
             data = (project_id, project_name)
             self.execute_query(insert_query, data)
@@ -349,18 +349,21 @@ class DB:
         except Exception as e:
             logger.error(f"Error retrieving LLM models: {e}")
             raise Exception("Failed to retrieve LLM models.")
+    
     def get_role_id_by_name(self, role_name: str):
         query = """
             SELECT role_id FROM task_management.roles WHERE role_name = %s
         """
         result = self.retrieve_data(query=query, data=(role_name,))
         return result if result else None
+    
     def check_user_query(self, email: str) -> bool:
         query = """
             SELECT 1 FROM task_management.users WHERE email = %s
         """
         result = self.retrieve_data(query=query, data=(email,))
         return result
+    
     def insert_user(self, user_data: tuple):
         query = """
             INSERT INTO task_management.users 
@@ -377,6 +380,7 @@ class DB:
         """
         result = self.retrieve_data(query=query, data=(email,))
         return result if result else None
+    
     def get_role(self):
         query = """
             SELECT role_id, role_name, description 
@@ -464,3 +468,56 @@ class DB:
             logger.error(f"Error inserting tasks: {e}")
             raise Exception(f"Error inserting tasks: {e}")
 
+    def get_user_chat_details(self, user_id: str , project_id : str ) -> List[Dict[str, Any]]:
+        """
+        Retrieve chat information for a specific user.
+        Returns a list of dictionaries containing chat details.
+        """
+        try:
+            query = f"""
+                SELECT c.conversation_id, c.project_id, c.chat_type, c.created_at,
+                       cm.message_id, cm.user_query, cm.agent_response, cm.created_at AS message_created_at
+                FROM {self.schema}.conversation c
+                JOIN {self.schema}.conversation_message cm ON c.conversation_id = cm.conversation_id
+                WHERE c.user_id = %s and c.project_id = %s
+                ORDER BY c.created_at DESC
+            """
+            result = self.retrieve_data(query, (user_id,project_id))
+            return [
+                {
+                    "conversation_id": row[0],
+                    "project_id": row[1],
+                    "chat_type": row[2],
+                    "created_at": row[3],
+                    "message_id": row[4],
+                    "user_query": row[5],
+                    "agent_response": row[6],
+                    "message_created_at": row[7]
+                } for row in result
+            ]
+        except Exception as e:
+            logger.error(f"Error retrieving user chat info: {e}")
+            raise Exception(f"Error retrieving user chat info: {e}")
+    
+    def get_user_chat_info(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        Retrieve chat information for a specific user.
+        Returns a list of dictionaries containing chat details.
+        """
+        try:
+            query = f"""
+                SELECT project_id , project_name, created_at 
+                from {self.schema}.projects
+                WHERE created_by = %s ORDER BY created_at DESC
+            """
+            result = self.retrieve_data(query, (user_id,))
+            return [
+                {
+                    "project_id": row[0],
+                    "project_name": row[1],
+                    "created_at": row[2]
+                } for row in result
+            ]
+        except Exception as e:
+            logger.error(f"Error retrieving user chat info: {e}")
+            raise Exception(f"Error retrieving user chat info: {e}")

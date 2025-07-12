@@ -3,13 +3,14 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from utils import db_obj , logger
+from utils.sendEmail import send_email
 from datetime import datetime
 import uuid
 import traceback
 from typing import List, Optional
 from models import (
     UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
-    TaskCreatorAgentRequest
+    TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
 
@@ -218,7 +219,8 @@ def create_project(
         db_obj.insert_project(
             project_id=creat_project.project_id,
             project_name=creat_project.project_name, 
-            conversation_id=creat_project.conversation_id
+            conversation_id=creat_project.conversation_id,
+            user_id  = creat_project.user_id
         )
         
         db_obj.insert_conversation(
@@ -363,7 +365,50 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
     except Exception as e:
         # logger.log(message=f"Unhandled erragentor: {e}", log_level="ERROR")
         return handle_api_error(e)
-    
+
+
+@app.post("/email-summary-generator")
+async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
+    try:
+       
+        # Initialize email summary generator agent
+        email_summary_generator_agent = SRSCreatorAgent()
+        src_document = db_obj.get_finalize_srs(
+            project_id=agent_request.project_id,
+        )
+        # Generate email summary
+        response = email_summary_generator_agent.generate_summary(
+            agent_request.model_id, agent_request.model_type, agent_request.temperature , src_document
+        )
+
+        #TODO
+        # return JSONResponse(content={"summary": response.get("")}, status_code=200)
+        subject = response.get("subject", "Summary of SRS Document")
+        body = response.get("body", "No content generated.")
+
+        # Step 5: Call your prebuilt send_email function
+        await send_email(
+            subject=subject,
+            body=body
+        )
+
+        # Step 6: Return success
+        return JSONResponse(
+            content={"status": "success", "message": "Email summary sent successfully."},
+            status_code=200
+        )
+
+    except Exception as e:
+        return JSONResponse(
+            content={"status": "error", "message": f"Error sending email: {e}"},
+            status_code=500
+        )
+
+
+    except Exception as e:
+        logger.error(f"Error in email summary generator: {str(e)}")
+        return handle_api_error(e)
+
 @app.get("/models")
 async def get_models():
     try:
@@ -392,6 +437,8 @@ async def get_models():
 
     except Exception as e:
         return handle_api_error(e)@app.post("/task-generator-agent")
+
+@app.get("/task_creation")
 def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
     try:
 
@@ -420,6 +467,48 @@ def task_creation(request: Request , agent_request: TaskCreatorAgentRequest):
         logger.error(f"Error uploading files: {str(e)}")
         return handle_api_error(e)
 
+
+@app.post("/fetch-user-chat-info")
+async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        chat_info = db_obj.get_user_chat_info(user_id)
+
+        if not chat_info:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat information found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_info": chat_info},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat info: {str(e)}")
+        return handle_api_error(e)
+    
+@app.post("/fetch-user-chat-details")
+async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
+    try:
+        user_id = request.user_id
+        chat_details = db_obj.get_user_chat_details(user_id)
+
+        if not chat_details:
+            return JSONResponse(
+                content={"status": "error", "message": "No chat details found for the user"},
+                status_code=404
+            )
+
+        return JSONResponse(
+            content={"status": "success", "chat_details": chat_details},
+            status_code=200
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching user chat details: {str(e)}")
+        return handle_api_error(e)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)
