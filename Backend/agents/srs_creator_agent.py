@@ -103,7 +103,7 @@ class SRSCreatorAgent(Agent, ABC):
         
 
 
-    def generate_summary(self, model_id, temperature , src_document):
+    def generate_summary(self, model_id,model_type, temperature , src_document):
         try:
 
             base_prompt = f"""
