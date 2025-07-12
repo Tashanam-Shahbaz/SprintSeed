@@ -93,3 +93,59 @@ CREATE TABLE task_management.user_availability (
     available_to TIMESTAMP WITH TIME ZONE,
     status VARCHAR(20) DEFAULT 'available'
 );
+
+
+-- Create or update the conversation table (main conversation metadata)
+CREATE TABLE IF NOT EXISTS task_management.conversation (
+    conversation_id VARCHAR(100) PRIMARY KEY,
+    project_id VARCHAR(100) REFERENCES task_management.projects(project_id),
+    chat_type VARCHAR(50) NOT NULL, -- e.g., 'support', 'research', 'planning'
+    user_id VARCHAR(100) REFERENCES task_management.users(user_id),
+    title VARCHAR(255), -- Optional title for the conversation
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    status VARCHAR(20) DEFAULT 'active' -- 'active', 'archived', 'deleted'
+);
+
+-- Create conversation_message table for the actual messages
+CREATE TABLE IF NOT EXISTS task_management.conversation_message (
+    message_id VARCHAR(100) PRIMARY KEY,
+    conversation_id VARCHAR(100) REFERENCES task_management.conversation(conversation_id) ON DELETE CASCADE,
+    user_query VARCHAR(5000) NOT NULL, 
+    agent_response TEXT NOT NULL,
+    model_id VARCHAR(100), -- Required for agent messages, NULL for user messages
+    model_type VARCHAR(50), -- e.g., 'text', 'vision'
+    tokens_used INTEGER, -- Track token usage
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
+);
+
+-- Create conversation_attachment table for files attached to messages
+CREATE TABLE IF NOT EXISTS task_management.conversation_attachment (
+    attachment_id VARCHAR(100) PRIMARY KEY,
+    conversation_id VARCHAR(100) REFERENCES task_management.conversation(conversation_id) ON DELETE CASCADE,
+    file_name VARCHAR(255) NOT NULL,
+    file_type VARCHAR(100) NOT NULL, -- MIME type
+    file_size BIGINT NOT NULL, -- in bytes
+    file_content TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
+);
+
+
+-- Add unique constraint to username
+ALTER TABLE task_management.users
+ADD CONSTRAINT unique_username UNIQUE (username);
+
+-- Add unique constraint to email
+ALTER TABLE task_management.users
+ADD CONSTRAINT unique_email UNIQUE (email);
+
+-- Insert predefined roles with manual role_id values
+INSERT INTO task_management.roles (role_id, role_name, description)
+VALUES 
+  ('1', 'Project Manager', 'Responsible for managing the project and coordinating teams.'),
+  ('2', 'Frontend Developer', 'Responsible for UI/UX and client-side application development.'),
+  ('3', 'Backend Developer', 'Handles server-side logic, database, and application integration.'),
+  ('4', 'Database Manager', 'Manages the database schema, security, and data integrity.');

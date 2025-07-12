@@ -6,7 +6,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('api.log')
+        logging.FileHandler('sprint_speed.log')
     ]
 )
-logger = logging.getLogger('api')
+logger = logging.getLogger('sprint_speed')
