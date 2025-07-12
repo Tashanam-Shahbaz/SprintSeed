@@ -32,3 +32,5 @@ python-multipart==0.0.20
 google-genai
 pydantic[email]
 unstructured==0.17.2
+aiosmtplib
+jinja2
