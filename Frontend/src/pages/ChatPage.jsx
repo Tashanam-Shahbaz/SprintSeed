@@ -108,7 +108,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
             <HeaderLogo>SprintSeed</HeaderLogo>
             <HeaderContent>
               <span className="text-sm text-muted-foreground">
-                Welcome, {user?.username || 'User'}
+                Welcome, {user?.first_name || 'User'}!
               </span>
               <button
                 onClick={onLogout}

@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
-import './App.css';
-import LoginPage from './pages/LoginPage';
-import ChatPage from './pages/ChatPage';
-import EmailModal from './components/email/EmailModal';
+import React, { useState } from "react";
+import "./App.css";
+import LoginPage from "./pages/LoginPage";
+import ChatPage from "./pages/ChatPage";
+import EmailModal from "./components/email/EmailModal";
 
 function App() {
   const [user, setUser] = useState(null);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
-  const handleLogin = (credentials) => {
-    // In a real app, you would validate credentials with your API
+  const handleLogin = (userData) => {
+    if (!userData) return;
+
     setUser({
-      username: credentials.username,
-      // Add other user data as needed
+      user_id: userData.user_id,
+      username: userData.username,
+      email: userData.email,
+      role_id: userData.role_id,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
     });
   };
 
@@ -26,8 +31,8 @@ function App() {
 
   const handleEmailSend = async (emailData) => {
     // In a real app, you would send this to your API
-    console.log('Sending email:', emailData);
-    
+    console.log("Sending email:", emailData);
+
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -47,8 +52,8 @@ function App() {
         <LoginPage onLogin={handleLogin} />
       ) : (
         <>
-          <ChatPage 
-            user={user} 
+          <ChatPage
+            user={user}
             onLogout={handleLogout}
             onSendEmail={handleSendEmail}
           />
@@ -64,4 +69,3 @@ function App() {
 }
 
 export default App;
-
