@@ -1,6 +1,7 @@
 from abc import ABC
 from .core import Agent 
 import json 
+from utils.model_token_manager import adjust_prompt_and_history_for_proposal
 
 class SRSCreatorAgent(Agent, ABC):
     
