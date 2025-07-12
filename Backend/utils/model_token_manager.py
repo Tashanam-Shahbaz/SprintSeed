@@ -101,8 +101,8 @@ model_dict_static = [
     "is_image_support": True,
     },
     {
-        "model_name": "gemini-2.5-pro-expreview-03-25",
-        "model_type": "google",
+        "model_name": "gemini-2.5-pro",
+        "model_type": "google_genai",
         "max_token": 64000,
         "context_window": 1000000,
         "location": "us-central1",

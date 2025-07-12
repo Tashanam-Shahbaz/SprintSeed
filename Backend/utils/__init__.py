@@ -3,6 +3,8 @@ from .shared import logger
 import os
 
 redis_url = os.getenv("REDIS_URL")
+genai_api_key = os.getenv("GENAI_API_KEY")
+
 
 db_schema = os.getenv("DB_SCHEMA")
 db_host = os.getenv("DB_HOST")
