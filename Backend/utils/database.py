@@ -226,7 +226,7 @@ class DB:
                 INSERT INTO {self.schema}.projects (project_id, project_name, created_by ,created_at )
                 VALUES (%s, %s , %s , CURRENT_TIMESTAMP)
             """
-            data = (project_id, project_name)
+            data = (project_id, project_name , user_id )
             self.execute_query(insert_query, data)
             logger.info(f"Project inserted successfully: {project_id}")
         except Exception as e:
@@ -475,8 +475,8 @@ class DB:
         """
         try:
             query = f"""
-                SELECT c.conversation_id, c.project_id, c.chat_type, c.created_at,
-                       cm.message_id, cm.user_query, cm.agent_response, cm.created_at AS message_created_at
+                SELECT c.conversation_id, c.project_id, c.chat_type,  TO_CHAR(c.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+                       cm.message_id, cm.user_query, cm.agent_response, TO_CHAR(cm.created_at, 'YYYY-MM-DD HH24:MI:SS') AS message_created_at
                 FROM {self.schema}.conversation c
                 JOIN {self.schema}.conversation_message cm ON c.conversation_id = cm.conversation_id
                 WHERE c.user_id = %s and c.project_id = %s
@@ -506,7 +506,7 @@ class DB:
         """
         try:
             query = f"""
-                SELECT project_id , project_name, created_at 
+                SELECT project_id , project_name, TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
                 from {self.schema}.projects
                 WHERE created_by = %s ORDER BY created_at DESC
             """

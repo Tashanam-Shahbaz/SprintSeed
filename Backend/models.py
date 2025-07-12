@@ -34,7 +34,7 @@ class SRSGeneratorRequest(BaseModel):
         None, description="List of file paths to be processed for SRS generation"
     )
     chat_type: str = Field(default="srs_document", description="Type of chat for the project")
-
+    user_id: str = Field(..., description="Unique identifier for the user")
 
 class EmailSummaryGeneratorRequest(BaseModel):
 
@@ -65,3 +65,4 @@ class TaskCreatorAgentRequest(BaseModel):
 
 class FetchUserChatInfoRequest(BaseModel):
     user_id: str = Field(..., description="Unique identifier for the user")
+    project_id: str = Field(..., description="Unique identifier for the project")
