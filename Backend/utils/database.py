@@ -233,7 +233,7 @@ class DB:
             logger.error(f"Error inserting project: {e}")
             raise Exception(f"Error inserting project: {e}")
     
-    def insert_conversation(self, conversation_id: str, project_id: str, chat_type: str):
+    def insert_conversation(self, conversation_id: str, project_id: str, chat_type: str , user_id: str):
         """Insert a new conversation into the database if it does not already exist."""
         try:
             # Check if conversation exists
@@ -247,10 +247,10 @@ class DB:
 
             # Insert if not exists
             insert_query = f"""
-                INSERT INTO {self.schema}.conversation (conversation_id, project_id, chat_type, created_at)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                INSERT INTO {self.schema}.conversation (conversation_id, project_id, user_id ,chat_type, created_at)
+                VALUES (%s, %s, %s,%s, CURRENT_TIMESTAMP)
             """
-            data = (conversation_id, project_id, chat_type)
+            data = (conversation_id, project_id, user_id ,  chat_type)
             self.execute_query(insert_query, data)
             logger.info(f"Conversation inserted successfully: {conversation_id}, {project_id}, {chat_type}")
         except Exception as e:

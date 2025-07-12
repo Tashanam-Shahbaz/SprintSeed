@@ -226,7 +226,8 @@ def create_project(
         db_obj.insert_conversation(
             conversation_id=creat_project.conversation_id,
             project_id=creat_project.project_id,
-            chat_type=creat_project.chat_type
+            chat_type=creat_project.chat_type,
+            user_id  = creat_project.user_id
         )
         project_id=creat_project.project_id
         return JSONResponse(
@@ -301,7 +302,8 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         db_obj.insert_conversation(
             conversation_id=agent_request.conversation_id,
             project_id=agent_request.project_id,
-            chat_type=agent_request.chat_type
+            chat_type=agent_request.chat_type,
+            user_id=agent_request.user_id
         )
 
         #Read Files
