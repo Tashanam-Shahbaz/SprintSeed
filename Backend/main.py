@@ -9,7 +9,7 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest,
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest, FetchUserChatDetailRequest,
     TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
@@ -501,8 +501,8 @@ async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
 
         if not chat_info:
             return JSONResponse(
-                content={"status": "error", "message": "No chat information found for the user"},
-                status_code=404
+                content={"status": "success", "message": "No chat information found for the user"},
+                status_code=200
             )
 
         return JSONResponse(
@@ -515,7 +515,7 @@ async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
         return handle_api_error(e)
     
 @app.post("/fetch-user-chat-details")
-async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
+async def fetch_user_chat_details(request: FetchUserChatDetailRequest):
     try:
         user_id = request.user_id
         project_id = request.project_id
