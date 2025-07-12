@@ -379,7 +379,8 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
             agent_request.model_id, agent_request.temperature , src_document
         )
 
-        return JSONResponse(content={"summary": response}, status_code=200)
+        #TODO
+        return JSONResponse(content={"summary": response.get("")}, status_code=200)
 
 
     except Exception as e:
