@@ -423,10 +423,13 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
 @app.post("/send-email")
 async def send_email_api(email_request: EmailRequest):
     try:
+        # file_content = await email_request.attachment.read() if email_request.attachment else None
+        # filename = email_request.attachment.filename if email_request.attachment else None
         await send_email(
             subject=email_request.subject,
             body=email_request.body,
-            reciever=email_request.recipient
+            reciever=email_request.recipient,
+            attachment=email_request.attachment 
         )
         return JSONResponse(
             content={"message": "Email sent successfully"},

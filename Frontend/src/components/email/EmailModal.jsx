@@ -120,61 +120,112 @@ const EmailModal = ({
 
     setIsLoading(true);
 
-    try {
-      // Prepare FormData for send-email API (to support file attachments)
-      // const formData = new FormData();
-      // formData.append('subject', emailData.subject);
-      // formData.append('body', emailData.message);
-      // formData.append('recipient', emailData.recipient);
+    // try {
+    //   // Prepare FormData for send-email API (to support file attachments)
+    //   // const formData = new FormData();
+    //   // formData.append('subject', emailData.subject);
+    //   // formData.append('body', emailData.message);
+    //   // formData.append('recipient', emailData.recipient);
 
-      // // Add attachment if present
-      // if (attachment) {
-      //   formData.append('attachment', attachment);
-      // }
+    //   // // Add attachment if present
+    //   // if (attachment) {
+    //   //   formData.append('attachment', attachment);
+    //   // }
 
-      // const response = await fetch('http://localhost:8000/send-email', {
-      //   method: 'POST',
-      //   body: formData // Using FormData instead of JSON to support file uploads
-      // });
-      const response = await fetch("http://localhost:8000/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subject: emailData.subject,
-          body: emailData.message,
-          recipient: emailData.recipient,
-        }),
-      });
+    //   // const response = await fetch('http://localhost:8000/send-email', {
+    //   //   method: 'POST',
+    //   //   body: formData // Using FormData instead of JSON to support file uploads
+    //   // });
+    //   const response = await fetch("http://localhost:8000/send-email", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       subject: emailData.subject,
+    //       body: emailData.message,
+    //       recipient: emailData.recipient,
+    //     }),
+    //   });
 
-      if (!response.ok) {
-        throw new Error("Failed to send email");
+    //   if (!response.ok) {
+    //     throw new Error("Failed to send email");
+    //   }
+
+    //   // Call the original onSend callback if provided
+    //   if (onSend) {
+    //     await onSend(emailData);
+    //   }
+
+    //   // Reset form
+    //   setEmailData({
+    //     recipient: "",
+    //     subject: "",
+    //     message: "",
+    //   });
+    //   const hadAttachment = !!attachment;
+    //   setAttachment(null);
+    //   onClose();
+
+    //   toast.success(
+    //     `Email sent successfully${hadAttachment ? " with attachment" : ""}!`
+    //   );
+    // } catch (error) {
+    //   console.error("Failed to send email:", error);
+    //   toast.error("Failed to send email. Please try again.");
+    // } finally {
+    //   setIsLoading(false);
+    // }
+    const sendRequest = async (base64Attachment = null) => {
+      try {
+        const response = await fetch("http://localhost:8000/send-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subject: emailData.subject,
+            body: emailData.message,
+            recipient: emailData.recipient,
+            attachment: base64Attachment,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to send email");
+        }
+
+        if (onSend) {
+          await onSend(emailData);
+        }
+
+        toast.success(
+          `Email sent successfully${attachment ? " with attachment" : ""}!`
+        );
+        setEmailData({ recipient: "", subject: "", message: "" });
+        setAttachment(null);
+        onClose();
+      } catch (error) {
+        console.error("Failed to send email:", error);
+        toast.error("Failed to send email. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Call the original onSend callback if provided
-      if (onSend) {
-        await onSend(emailData);
-      }
-
-      // Reset form
-      setEmailData({
-        recipient: "",
-        subject: "",
-        message: "",
-      });
-      const hadAttachment = !!attachment;
-      setAttachment(null);
-      onClose();
-
-      toast.success(
-        `Email sent successfully${hadAttachment ? " with attachment" : ""}!`
-      );
-    } catch (error) {
-      console.error("Failed to send email:", error);
-      toast.error("Failed to send email. Please try again.");
-    } finally {
-      setIsLoading(false);
+    if (attachment) {
+      const reader = new FileReader();
+      reader.readAsDataURL(attachment);
+      reader.onload = async () => {
+        const base64String = reader.result;
+        await sendRequest(base64String);
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read the attachment");
+        setIsLoading(false);
+      };
+    } else {
+      await sendRequest(null);
     }
   };
 

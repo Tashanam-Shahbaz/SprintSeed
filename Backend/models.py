@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional , List , Dict , Any
 import uuid
+from fastapi import Form, UploadFile, File
+
 
 #user Model
 from pydantic import BaseModel, EmailStr
@@ -23,6 +25,7 @@ class EmailRequest(BaseModel):
     subject: str
     body: str
     recipient: EmailStr
+    attachment: Optional[str] = None
 
 
 class SRSGeneratorRequest(BaseModel):
