@@ -70,11 +70,8 @@ class TaskCreatorAgentRequest(BaseModel):
 
 class FetchUserChatInfoRequest(BaseModel):
     user_id: str = Field(..., description="Unique identifier for the user")
-<<<<<<< HEAD
-=======
     # project_id: str = Field(..., description="Unique identifier for the project")
 
 class FetchUserChatDetailRequest(BaseModel):
     user_id: str = Field(..., description="Unique identifier for the user")
->>>>>>> dc0f6dd7cbf52e18e1e48b8e9733b99c395fd8c5
     project_id: str = Field(..., description="Unique identifier for the project")
