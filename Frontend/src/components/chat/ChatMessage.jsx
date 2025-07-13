@@ -17,6 +17,14 @@ const ChatMessage = ({ message, isUser = false }) => {
     try {
       console.log('Starting PDF generation for:', documentId);
       
+      // Get the message content
+      const content = message.content || '';
+      
+      if (!content.trim()) {
+        alert('No content available to download');
+        return;
+      }
+      
       // Create PDF using jsPDF
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = 210;
@@ -44,8 +52,7 @@ const ChatMessage = ({ message, isUser = false }) => {
       pdf.line(margin, yPosition, pageWidth - margin, yPosition);
       yPosition += lineHeight;
       
-      // Process markdown content
-      const content = message.content || '';
+      // Process content - split by lines and handle formatting
       const lines = content.split('\n');
       
       for (let i = 0; i < lines.length; i++) {
@@ -58,18 +65,18 @@ const ChatMessage = ({ message, isUser = false }) => {
         }
         
         // Check if we need a new page
-        if (yPosition > pageHeight - margin - lineHeight) {
+        if (yPosition > pageHeight - margin - lineHeight * 3) {
           pdf.addPage();
           yPosition = margin;
         }
         
-        // Handle different markdown elements
+        // Handle different content types
         if (line.match(/^#{1,6}\s/)) {
-          // Headers
+          // Markdown headers
           const headerLevel = line.match(/^#+/)[0].length;
           const headerText = line.replace(/^#+\s/, '');
           
-          yPosition += lineHeight * 0.8; // Add space before header
+          yPosition += lineHeight * 0.8;
           
           if (headerLevel === 1) {
             pdf.setFontSize(16);
@@ -82,14 +89,30 @@ const ChatMessage = ({ message, isUser = false }) => {
             pdf.setFont('helvetica', 'bold');
           }
           
-          // Split long headers
           const headerLines = pdf.splitTextToSize(headerText, maxLineWidth);
           for (const headerLine of headerLines) {
             pdf.text(headerLine, margin, yPosition);
             yPosition += lineHeight;
           }
           
-          yPosition += lineHeight * 0.5; // Add space after header
+          yPosition += lineHeight * 0.5;
+          
+        } else if (line.match(/^(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)$/i)) {
+          // Main section headers
+          yPosition += lineHeight;
+          pdf.setFontSize(16);
+          pdf.setFont('helvetica', 'bold');
+          
+          const sectionLines = pdf.splitTextToSize(line, maxLineWidth);
+          for (const sectionLine of sectionLines) {
+            pdf.text(sectionLine, margin, yPosition);
+            yPosition += lineHeight;
+          }
+          
+          // Add underline
+          pdf.setLineWidth(0.3);
+          pdf.line(margin, yPosition, margin + 60, yPosition);
+          yPosition += lineHeight;
           
         } else if (line.match(/^\d+\.\s/)) {
           // Numbered lists
@@ -103,41 +126,8 @@ const ChatMessage = ({ message, isUser = false }) => {
           
           const listLines = pdf.splitTextToSize(line, maxLineWidth - 5);
           for (let j = 0; j < listLines.length; j++) {
-            const xPos = j === 0 ? margin : margin + 5; // Indent continuation lines
-            pdf.text(listLines[j], xPos, yPosition);
-            yPosition += lineHeight;
-          }
-          
-          yPosition += lineHeight * 0.3; // Add space after list item
-          
-        } else if (line.match(/^[-*+]\s/)) {
-          // Bullet lists
-          pdf.setFontSize(11);
-          pdf.setFont('helvetica', 'normal');
-          
-          line = line.replace(/^[-*+]\s/, '• '); // Replace with bullet
-          line = line.replace(/\*\*(.*?)\*\*/g, '$1');
-          line = line.replace(/\*(.*?)\*/g, '$1');
-          line = line.replace(/`(.*?)`/g, '$1');
-          
-          const bulletLines = pdf.splitTextToSize(line, maxLineWidth - 5);
-          for (let j = 0; j < bulletLines.length; j++) {
             const xPos = j === 0 ? margin : margin + 5;
-            pdf.text(bulletLines[j], xPos, yPosition);
-            yPosition += lineHeight;
-          }
-          
-          yPosition += lineHeight * 0.3;
-          
-        } else if (line.match(/^\*\*.*\*\*:?$/)) {
-          // Bold section headers
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
-          
-          const boldText = line.replace(/\*\*/g, ''); // Remove bold markers
-          const boldLines = pdf.splitTextToSize(boldText, maxLineWidth);
-          for (const boldLine of boldLines) {
-            pdf.text(boldLine, margin, yPosition);
+            pdf.text(listLines[j], xPos, yPosition);
             yPosition += lineHeight;
           }
           
@@ -152,7 +142,7 @@ const ChatMessage = ({ message, isUser = false }) => {
           line = line.replace(/\*\*(.*?)\*\*/g, '$1');
           line = line.replace(/\*(.*?)\*/g, '$1');
           line = line.replace(/`(.*?)`/g, '$1');
-          line = line.replace(/\[(.*?)\]\(.*?\)/g, '$1'); // Remove links, keep text
+          line = line.replace(/\[(.*?)\]\(.*?\)/g, '$1');
           
           const paragraphLines = pdf.splitTextToSize(line, maxLineWidth);
           for (const paragraphLine of paragraphLines) {
@@ -160,7 +150,7 @@ const ChatMessage = ({ message, isUser = false }) => {
             yPosition += lineHeight;
           }
           
-          yPosition += lineHeight * 0.5; // Add space after paragraph
+          yPosition += lineHeight * 0.5;
         }
       }
       
@@ -171,6 +161,7 @@ const ChatMessage = ({ message, isUser = false }) => {
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
         pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 20, pageHeight - 10);
+        pdf.text('Generated by SprintSeed', margin, pageHeight - 10);
       }
       
       // Save the PDF
@@ -201,6 +192,63 @@ const ChatMessage = ({ message, isUser = false }) => {
     }
   };
 
+  // Function to render content with proper formatting
+  const renderContent = (content, isStreaming = false) => {
+    if (isUser) {
+      return (
+        <p className="text-foreground leading-relaxed mb-0">
+          {content}
+        </p>
+      );
+    }
+
+    // For streaming content, display as plain text with preserved line breaks
+    if (isStreaming) {
+      return (
+        <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+          {content}
+        </div>
+      );
+    }
+
+    // For completed content, use ReactMarkdown for proper formatting
+    return (
+      <div className="markdown-content">
+        <ReactMarkdown
+          components={{
+            h1: ({children}) => <h1 className="text-xl font-bold mb-4 mt-6 text-foreground border-b border-border pb-2">{children}</h1>,
+            h2: ({children}) => <h2 className="text-lg font-semibold mb-3 mt-5 text-foreground">{children}</h2>,
+            h3: ({children}) => <h3 className="text-base font-medium mb-2 mt-4 text-foreground">{children}</h3>,
+            p: ({children}) => {
+              const text = children?.toString() || '';
+              
+              // Check if it's a main section header
+              if (text.match(/^(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)$/i)) {
+                return <h1 className="text-xl font-bold mb-4 mt-6 text-foreground border-b-2 border-primary pb-2 uppercase">{children}</h1>;
+              }
+              
+              // Check if it's a numbered list item
+              if (text.match(/^\d+\.\s/)) {
+                return <div className="mb-3 text-foreground leading-relaxed font-medium pl-4 border-l-2 border-accent bg-accent/5 py-2">{children}</div>;
+              }
+              
+              return <p className="mb-3 text-foreground leading-relaxed">{children}</p>;
+            },
+            ul: ({children}) => <ul className="list-disc list-inside mb-4 pl-4 text-foreground space-y-2">{children}</ul>,
+            ol: ({children}) => <ol className="list-decimal list-inside mb-4 pl-4 text-foreground space-y-2">{children}</ol>,
+            li: ({children}) => <li className="mb-2 leading-relaxed">{children}</li>,
+            code: ({children}) => <code className="bg-muted px-2 py-1 rounded text-sm font-mono text-foreground">{children}</code>,
+            pre: ({children}) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4 whitespace-pre-wrap">{children}</pre>,
+            strong: ({children}) => <strong className="font-bold text-foreground">{children}</strong>,
+            em: ({children}) => <em className="italic text-foreground">{children}</em>,
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    );
+  };
+
   return (
     <div className={cn(
       "chat-message flex gap-4 p-4",
@@ -225,80 +273,18 @@ const ChatMessage = ({ message, isUser = false }) => {
         )}>
           <CardContent className="p-4">
             <div className="prose prose-sm max-w-none">
-              {isUser ? (
-                <p className="text-foreground leading-relaxed mb-0">
-                  {message.content}
-                </p>
-              ) : (
-                <div className="markdown-content">
-                  <ReactMarkdown
-                    components={{
-                      h1: ({children}) => <h1 className="text-xl font-bold mb-4 mt-6 text-foreground border-b border-border pb-2">{children}</h1>,
-                      h2: ({children}) => <h2 className="text-lg font-semibold mb-3 mt-5 text-foreground">{children}</h2>,
-                      h3: ({children}) => <h3 className="text-base font-medium mb-2 mt-4 text-foreground">{children}</h3>,
-                      p: ({children}) => {
-                        const text = children?.toString() || '';
-                        
-                        // Check if it's a main section header (INTRODUCTION, BACKEND ARCHITECTURE, etc.)
-                        if (text.match(/^(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)$/i)) {
-                          return <h1 className="text-xl font-bold mb-4 mt-6 text-foreground border-b-2 border-primary pb-2 uppercase">{children}</h1>;
-                        }
-                        
-                        // Check if it's a STAGE header
-                        if (text.match(/^STAGE \d+:/i)) {
-                          return <h2 className="text-lg font-semibold mb-3 mt-5 text-foreground border-b border-border pb-1">{children}</h2>;
-                        }
-                        
-                        // Check if it's a section header (ALL CAPS with 8+ characters)
-                        if (text.match(/^[A-Z\s]{8,}:?\s*$/)) {
-                          return <h2 className="text-lg font-bold mb-3 mt-5 text-foreground uppercase border-b border-border pb-1">{children}</h2>;
-                        }
-                        
-                        // Check if it's a subsection header (Title Case followed by colon)
-                        if (text.match(/^[A-Z][a-zA-Z\s]+:\s*$/)) {
-                          return <h3 className="text-base font-semibold mb-2 mt-4 text-foreground">{children}</h3>;
-                        }
-                        
-                        // Check if it's a numbered list item
-                        if (text.match(/^\d+\.\s/)) {
-                          return <div className="mb-3 text-foreground leading-relaxed font-medium pl-4 border-l-2 border-accent bg-accent/5 py-2">{children}</div>;
-                        }
-                        
-                        // Check if it contains table/API content (pipe symbols)
-                        if (text.includes('|') && text.split('|').length > 2) {
-                          return <div className="mb-3 text-foreground leading-relaxed font-mono text-sm bg-muted p-2 rounded border">{children}</div>;
-                        }
-                        
-                        return <p className="mb-3 text-foreground leading-relaxed">{children}</p>;
-                      },
-                      ul: ({children}) => <ul className="list-disc list-inside mb-4 pl-4 text-foreground space-y-2">{children}</ul>,
-                      ol: ({children}) => <ol className="list-decimal list-inside mb-4 pl-4 text-foreground space-y-2">{children}</ol>,
-                      li: ({children}) => <li className="mb-2 leading-relaxed">{children}</li>,
-                      code: ({children}) => <code className="bg-muted px-2 py-1 rounded text-sm font-mono text-foreground">{children}</code>,
-                      pre: ({children}) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4 whitespace-pre-wrap">{children}</pre>,
-                      strong: ({children}) => <strong className="font-bold text-foreground">{children}</strong>,
-                      em: ({children}) => <em className="italic text-foreground">{children}</em>,
-                      table: ({children}) => <table className="border-collapse border border-border w-full mb-4">{children}</table>,
-                      th: ({children}) => <th className="border border-border px-3 py-2 bg-muted font-semibold text-left">{children}</th>,
-                      td: ({children}) => <td className="border border-border px-3 py-2">{children}</td>,
-                      hr: () => <hr className="border-border my-6" />,
-                      blockquote: ({children}) => <blockquote className="border-l-4 border-accent pl-4 my-4 italic text-muted-foreground">{children}</blockquote>,
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                  {message.isStreaming && (
-                    <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">Generating...</span>
-                    </div>
-                  )}
+              {renderContent(message.content, message.isStreaming)}
+              
+              {message.isStreaming && (
+                <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Generating...</span>
                 </div>
               )}
             </div>
 
             {/* SRS Document Display */}
-            {message.document && (
+            { !message.isUser && (
               <div className="mt-4 p-4 bg-background rounded-lg border border-border">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-foreground">
@@ -307,7 +293,7 @@ const ChatMessage = ({ message, isUser = false }) => {
                   <Button
                     size="sm"
                     variant="accent"
-                    onClick={() => handleDownload(message.document.id)}
+                    onClick={() => handleDownload(message.document?.id || `srs-${message.id || Date.now()}`)}
                     disabled={isDownloading || message.isStreaming}
                     className="download-button gap-2 min-w-[100px]"
                   >
@@ -325,7 +311,7 @@ const ChatMessage = ({ message, isUser = false }) => {
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {message.document.description}
+                  {message.document?.description || "Generated SRS Document based on your requirements"}
                 </p>
               </div>
             )}
@@ -345,4 +331,3 @@ const ChatMessage = ({ message, isUser = false }) => {
 };
 
 export default ChatMessage;
-

@@ -37,16 +37,23 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         const data = await res.json();
 
         if (data.status === "success" && Array.isArray(data.chat_info)) {
-          const formattedChats = data.chat_info.map((chat, index) => ({
+          const sortedChats = data.chat_info.sort((a, b) => {
+            if (a.created_at && b.created_at) {
+              return new Date(b.created_at) - new Date(a.created_at);
+            }
+            return b.project_id.localeCompare(a.project_id);
+          });
+
+          const formattedChats = sortedChats.map((chat) => ({
             id: chat.project_id,
             title: chat.project_name,
-            isActive: index === 0, // Make the first chat active by default
-            projectId: chat.project_id
+            isActive: false,
+            projectId: chat.project_id,
+            createdAt: chat.created_at
           }));
+          
           setChats(formattedChats);
-          if (formattedChats.length > 0) {
-            setActiveChatId(formattedChats[0].id);
-          }
+          setActiveChatId(null);
         } else {
           console.error("Failed to load chat info", data);
         }
@@ -62,12 +69,10 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 
   const [messages, setMessages] = useState([]);
   const [lastSelectedModel, setLastSelectedModel] = useState(null);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleNewChat = async () => {
     try {
-      // Generate unique project ID
       const projectId = `project-${Date.now()}`;
       const projectName = `Project ${chats.length + 1}`;
       
@@ -91,37 +96,45 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       }
 
       const result = await response.json();
-      console.log('Project created successfully:', result);
-
-      // Use the project_id from the response
       const returnedProjectId = result.project_id || projectId;
 
-      // Add new chat to the list
       const newChat = {
         id: returnedProjectId,
         title: projectName,
-        isActive: false,
-        projectId: returnedProjectId
+        isActive: true,
+        projectId: returnedProjectId,
       };
-      setChats(prev => [...prev, newChat]);
-      
-      // Automatically select the new chat
-      handleChatSelect(returnedProjectId);
-      
+
+      setChats(prev => {
+        const updatedChats = prev.map(chat => ({ ...chat, isActive: false }));
+        return [newChat, ...updatedChats];
+      });
+
+      setActiveChatId(returnedProjectId);
+      setMessages([]);
+
+      return newChat;
+
     } catch (error) {
       console.error('Error creating project:', error);
-      // Still add the chat locally even if API fails
       const fallbackProjectId = `project-${Date.now()}`;
       const newChat = {
         id: fallbackProjectId,
         title: `Chat ${chats.length + 1}`,
-        isActive: false,
-        projectId: fallbackProjectId
+        isActive: true,
+        projectId: fallbackProjectId,
+        createdAt: new Date().toISOString()
       };
-      setChats(prev => [...prev, newChat]);
       
-      // Automatically select the new chat
-      handleChatSelect(fallbackProjectId);
+      setChats(prev => {
+        const updatedChats = prev.map(chat => ({ ...chat, isActive: false }));
+        return [newChat, ...updatedChats];
+      });
+      
+      setActiveChatId(fallbackProjectId);
+      setMessages([]);
+
+      return newChat;
     }
   };
 
@@ -187,16 +200,27 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       setLastSelectedModel(messageData.model);
     }
     
-    // Get the active chat to retrieve project ID
-    const activeChat = chats.find(chat => chat.id === activeChatId);
+    let activeChat = chats.find(chat => chat.id === activeChatId);
     if (!activeChat) {
-      console.error('No active chat found');
+      console.log('No active chat found, creating new chat...');
+      try {
+        activeChat = await handleNewChat();
+        console.log('New chat created:', activeChat);
+        // Wait a bit for state to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error('Failed to create new chat:', error);
+        return;
+      }
+    }
+
+    if (!activeChat) {
+      console.error('Still no active chat after creation attempt');
       return;
     }
 
-    // Add user message
     const userMessage = {
-      id: Date.now(),
+      id: `user-${Date.now()}`,
       ...messageData,
       isUser: true,
     };
@@ -204,12 +228,9 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     setIsLoading(true);
 
     try {
-      // Prepare file_ids array
       const fileIds = [];
       if (messageData.file) {
-        // In a real implementation, you would upload the file first and get its ID
-        // For now, we'll use a placeholder or skip files
-        fileIds.push("uploaded-file-id"); // Replace with actual file upload logic
+        fileIds.push("uploaded-file-id");
       }
 
       // Call the generate-srs-proposal API
@@ -233,11 +254,10 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate SRS proposal');
+        throw new Error(`API request failed with status: ${response.status}`);
       }
 
-      // Create AI message placeholder for streaming content
-      const aiMessageId = Date.now();
+      const aiMessageId = `ai-${Date.now()}`;
       const aiMessage = {
         id: aiMessageId,
         content: "",
@@ -252,68 +272,161 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       
       setMessages(prev => [...prev, aiMessage]);
 
-      // Set up EventSource for SSE handling
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullContent = "";
-
+      // NEW APPROACH: Use a more robust streaming handler
+      let accumulatedContent = "";
+      let isComplete = false;
+      
       try {
-        // Process the stream
-        while (true) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let noDataCount = 0;
+        const MAX_NO_DATA_COUNT = 10;
+
+        console.log('Starting robust streaming...');
+
+        while (!isComplete) {
           const { done, value } = await reader.read();
           
           if (done) {
+            console.log('Stream marked as done');
             break;
           }
           
-          // Decode the chunk
-          const chunk = decoder.decode(value, { stream: true });
+          if (!value || value.length === 0) {
+            noDataCount++;
+            if (noDataCount > MAX_NO_DATA_COUNT) {
+              console.log('Too many empty chunks, ending stream');
+              break;
+            }
+            continue;
+          }
           
-          // Parse SSE format (data: content\n\n)
-          const lines = chunk.split("\n\n");
+          noDataCount = 0;
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          // Process all complete lines
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || "";
           
           for (const line of lines) {
-            if (line.trim().startsWith("data: ")) {
-              // Extract just the content part after "data: "
-              const content = line.trim().substring(6);
+            let content = "";
+            
+            if (line.startsWith('data: ')) {
+              content = line.substring(6);
+            } else if (line.trim() && !line.startsWith('event:') && !line.startsWith(':')) {
+              content = line;
+            }
+            
+            if (content.trim()) {
+              accumulatedContent += content;
               
-              if (content) {
-                // Add to the full content
-                fullContent += content;
-                
-                // Format the content with proper line breaks for SRS document structure
-                let formattedContent = formatSRSContent(fullContent);
-                
-                // Update the message with the latest content
-                setMessages(prev => 
-                  prev.map(msg => 
-                    msg.id === aiMessageId 
-                      ? { ...msg, content: formattedContent }
-                      : msg
-                  )
-                );
+              // Check for completion markers
+              const lowerContent = accumulatedContent.toLowerCase();
+              if (lowerContent.includes('generate srs') || 
+                  lowerContent.includes('suggest changes') ||
+                  accumulatedContent.includes('[To generate') ||
+                  accumulatedContent.includes('reply with')) {
+                console.log('Found completion marker');
+                isComplete = true;
               }
+              
+              // Update UI
+              setMessages(prev => prev.map(msg => 
+                msg.id === aiMessageId 
+                  ? { ...msg, content: accumulatedContent }
+                  : msg
+              ));
             }
           }
+          
+          // Also check if we've received a substantial amount of content
+          if (accumulatedContent.length > 2000 && 
+              (accumulatedContent.includes('Quality assurance approach') ||
+               accumulatedContent.includes('Potential challenges'))) {
+            console.log('Substantial content received, likely complete');
+            isComplete = true;
+          }
         }
-      } catch (streamError) {
-        console.error("Stream reading error:", streamError);
-      } finally {
-        // Mark streaming as complete
-        setMessages(prev => 
-          prev.map(msg => 
+
+        // Process any remaining buffer
+        if (buffer.trim()) {
+          if (buffer.startsWith('data: ')) {
+            accumulatedContent += buffer.substring(6);
+          } else {
+            accumulatedContent += buffer;
+          }
+          
+          setMessages(prev => prev.map(msg => 
             msg.id === aiMessageId 
-              ? { ...msg, isStreaming: false }
+              ? { ...msg, content: accumulatedContent }
               : msg
-          )
-        );
+          ));
+        }
+
+        reader.releaseLock();
+        console.log('Final content length:', accumulatedContent.length);
+
+      } catch (streamError) {
+        console.error('Streaming error:', streamError);
+        
+        // Fallback: try to get the response as text
+        try {
+          const fallbackResponse = await fetch('http://localhost:8000/generate-srs-proposal', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              project_id: activeChat.projectId || activeChat.id,
+              project_name: activeChat.title,
+              conversation_id: activeChat.projectId || activeChat.id,
+              model_type: messageData.model?.model_type || 'openai',
+              model_id: messageData.model?.model_name || messageData.model?.model_id || 'gpt-4o',
+              temperature: 0.2,
+              user_query: messageData.content,
+              file_ids: fileIds,
+              chat_type: "srs_document",
+              user_id: user?.user_id
+            })
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackText = await fallbackResponse.text();
+            if (fallbackText && fallbackText.length > accumulatedContent.length) {
+              console.log('Using fallback response');
+              accumulatedContent = fallbackText;
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
+        
+        if (!accumulatedContent) {
+          accumulatedContent = "Error occurred while generating response. Please try again.";
+        }
+        
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessageId 
+            ? { ...msg, content: accumulatedContent }
+            : msg
+        ));
       }
+
+      // Mark as complete
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessageId 
+          ? { ...msg, isStreaming: false }
+          : msg
+      ));
+
     } catch (error) {
       console.error('Error generating SRS proposal:', error);
       
-      // Add error message
       const errorMessage = {
-        content: "Sorry, there was an error generating the SRS proposal. Please try again.",
+        id: `error-${Date.now()}`,
+        content: `Sorry, there was an error generating the SRS proposal: ${error.message}. Please try again.`,
         isUser: false,
         timestamp: new Date().toLocaleTimeString(),
         isError: true

@@ -1,14 +1,15 @@
 **STAGE 1: SRS PLAN**
+**STAGE 1: SRS PLAN**
 
-1.  **Project Overview and Scope:** The project is to develop a cross-platform task management mobile application ("TaskMaster") for individuals and small teams, excluding advanced enterprise features like SSO or detailed reporting.
-2.  **Primary Objectives and Success Criteria:** The primary objective is to enhance user productivity through intuitive task organization, with success measured by a 20% monthly active user growth rate and a 4.5+ star rating in app stores.
-3.  **Key Stakeholders and Target Users:** Stakeholders include the project owner and development team, while target users are students, freelancers, and small business professionals seeking a simple organizational tool.
-4.  **Core Functional Requirements:** The app will feature secure user authentication, comprehensive task creation and management (CRUD), project-based task grouping, and push notifications for reminders.
-5.  **Technical Stack Recommendations:** A recommended stack includes React Native for the frontend, Node.js with Express for the backend API, and MongoDB for the database to ensure rapid, scalable development.
-6.  **Data Management Approach:** All user data will be stored in a cloud-hosted database, with real-time synchronization enabled across all of a user's logged-in devices.
-7.  **Integration Requirements:** The application will require one-way integration to push task deadlines to third-party calendars, specifically Google Calendar and Apple Calendar.
-8.  **Security and Compliance Considerations:** Security will be enforced through OAuth 2.0 for authentication, JWT for session management, and SSL/TLS encryption for all data in transit.
-9.  **Potential Challenges or Constraints:** A key challenge will be maintaining optimal performance and seamless real-time data synchronization across different mobile operating systems and network conditions.
-10. **Quality Assurance Approach:** The QA strategy will involve a combination of automated unit/integration tests and manual end-to-end testing on a range of physical iOS and Android devices.
+1.  **Project Overview and Scope:** The project will create a centralized, web-based platform to automate employee attendance tracking, manage leave requests, and generate insightful reports for management.
+2.  **Primary Objectives and Success Criteria:** The main objective is to eliminate manual tracking errors and provide real-time attendance visibility; success will be measured by a 95% reduction in administrative time spent on attendance and 100% accurate data for payroll integration.
+3.  **Key Stakeholders and Target Users:** Key stakeholders are HR Managers and Department Heads, while the primary users include Employees, Line Managers (for approvals), and System Administrators.
+4.  **Core Functional Requirements:** The system must include secure user authentication with role-based access, real-time clock-in/out functionality (with optional geolocation), a comprehensive leave management workflow, and a dynamic reporting dashboard.
+5.  **Technical Stack Recommendations:** A MERN stack (MongoDB, Express.js, React.js, Node.js) is recommended for its real-time capabilities and scalability, coupled with a responsive, mobile-first UI design.
+6.  **Data Management Approach:** The system will use a NoSQL database (MongoDB) to store user profiles, attendance logs, and leave data, with policies for regular automated backups and data encryption at rest.
+7.  **Integration Requirements with Existing Systems:** The system must be designed with a RESTful API to allow for future integration with third-party payroll systems and HRIS platforms.
+8.  **Security and Compliance Considerations:** Implementation will enforce strict role-based access control (RBAC), use JWT for session management, encrypt all sensitive data in transit (SSL/TLS), and ensure compliance with local labor laws.
+9.  **Potential Challenges or Constraints:** Potential challenges include ensuring accurate time synchronization across diverse client devices, handling offline attendance marking, and driving user adoption across the organization.
+10. **Quality Assurance Approach:** A comprehensive testing strategy will be executed, including unit tests for business logic, integration tests for APIs, end-to-end automated tests for user flows, and a final User Acceptance Testing (UAT) phase.
 
 [To generate the complete SRS document based on this plan, please reply with 'Generate SRS' or suggest changes to the points above.]
