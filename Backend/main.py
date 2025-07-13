@@ -334,7 +334,7 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
                         chunk = chunk.replace("```string", "", 1).replace("```", "", 1).lstrip()
 
                     if last_chunk is not None:
-                        # print("chunk ", last_chunk)
+                        print("chunk ", last_chunk)
                         yield f"data: {last_chunk}\n\n"
                         accumulated_proposal += last_chunk
 
@@ -342,7 +342,7 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
 
                 if last_chunk:
                     last_chunk = last_chunk.rstrip("```")
-                    # print("chunk ", last_chunk)
+                    print("chunk ", last_chunk)
                     yield f"data: {last_chunk}\n\n"
                     accumulated_proposal += last_chunk
                 
