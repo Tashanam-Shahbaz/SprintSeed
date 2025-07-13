@@ -18,6 +18,45 @@ SprintSeed reduces this friction by allowing users (e.g., stakeholders, managers
 ⚡ This system has the potential to **replace or assist BAs and PMs** in early planning, offering speed, consistency, and transparency across the team.
 
 ---
+---
+
+## 🛠️ Installation Guide
+
+Follow the steps below to set up and run SprintSeed locally.
+
+---
+
+### 1. 📥 Clone the Repository
+
+```bash
+git clone the repository
+cd SprintSeed
+
+## For Backend
+
+cd Backend
+
+pip install -r requirements.txt
+
+run python main.py
+
+Once running, visit:
+
+http://localhost:8000/docs
+
+## For Frontnend
+
+cd Frontend
+
+npm install --legacy-peer-deps
+
+Start Development Server
+
+npm run dev
+
+Once running, go to the given localhost
+
+
 
 ## 🧠 Agent Flow
 
