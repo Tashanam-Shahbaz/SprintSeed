@@ -59,6 +59,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
   }, [user]);
 
   const [messages, setMessages] = useState([]);
+  const [lastSelectedModel, setLastSelectedModel] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -172,6 +173,11 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
   };
 
   const handleSendMessage = async (messageData) => {
+    // Store the selected model for email functionality
+    if (messageData.model) {
+      setLastSelectedModel(messageData.model);
+    }
+    
     // Get the active chat to retrieve project ID
     const activeChat = chats.find(chat => chat.id === activeChatId);
     if (!activeChat) {
@@ -392,7 +398,18 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           {/* Chat Input */}
           <ChatInput
             onSendMessage={handleSendMessage}
-            onSendEmail={onSendEmail}
+            onSendEmail={() => {
+              const activeChat = chats.find(chat => chat.id === activeChatId);
+              if (activeChat) {
+                onSendEmail({
+                  projectId: activeChat.projectId || activeChat.id,
+                  conversationId: activeChat.projectId || activeChat.id,
+                  model: lastSelectedModel
+                });
+              } else {
+                alert('Please select a chat first');
+              }
+            }}
             disabled={isLoading}
           />
         </MainContent>
