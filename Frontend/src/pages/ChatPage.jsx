@@ -33,7 +33,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           project_name: projectName,
           conversation_id: projectId,
           chat_type: "srs_document",
-          user_id: user?.id || "user-001"
+          user_id: user?.id 
         })
       });
 
@@ -117,7 +117,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           user_query: messageData.content,
           file_ids: fileIds,
           chat_type: "srs_document",
-          user_id: user?.id || "user-001"
+          user_id: user?.id
         })
       });
 
