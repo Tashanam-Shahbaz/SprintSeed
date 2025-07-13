@@ -14,6 +14,8 @@ import os
 
 # from utils import api_key , google_developer_api_key
 api_key  = os.getenv("OPEN_API_KEY", "")
+genai_api_key = os.getenv("GENAI_API_KEY")
+
 LOCATION = "us-central1"
 
 class Agent(ABC):
@@ -80,7 +82,15 @@ class Agent(ABC):
                 project_id=self.model_id,
                 location=self.location
             )
-
+        elif self.model_type == "google_genai":
+            return ChatGoogleGenerativeAI(
+                model=self.model_id,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                max_retries=2,
+                api_key=genai_api_key
+            )
+        
         elif self.model_type == "google":
             return ChatVertexAI(
                 model_name=self.model_id,
@@ -89,6 +99,7 @@ class Agent(ABC):
                 temperature=self.temperature,
                 location = self.location
             )
+        
         else:
             return ChatVertexAI(
                 model_name=self.model_id,
