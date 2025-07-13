@@ -1,18 +1,65 @@
-import React, { useState } from 'react';
-import { Layout, LayoutContent, MainContent } from '../components/layout/Layout';
-import { Header, HeaderLogo, HeaderContent } from '../components/layout/Header';
-import { Sidebar, SidebarHeader, SidebarContent, SidebarItem } from '../components/layout/Sidebar';
-import ChatArea from '../components/chat/ChatArea';
-import ChatInput from '../components/chat/ChatInput';
+import React, { useState, useEffect } from "react";
+import {
+  Layout,
+  LayoutContent,
+  MainContent,
+} from "../components/layout/Layout";
+import { Header, HeaderLogo, HeaderContent } from "../components/layout/Header";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarItem,
+} from "../components/layout/Sidebar";
+import ChatArea from "../components/chat/ChatArea";
+import ChatInput from "../components/chat/ChatInput";
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
-  const [chats, setChats] = useState([
-    { id: 1, title: 'Chat 1', isActive: true, projectId: 'project-default-1' },
-    { id: 2, title: 'Chat 2', isActive: false, projectId: 'project-default-2' },
-    { id: 3, title: 'Chat 3', isActive: false, projectId: 'project-default-3' },
-  ]);
+  const [chats, setChats] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/fetch-user-chat-info", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.user_id,
+            project_id: "",
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success" && Array.isArray(data.chat_info)) {
+          const formattedChats = data.chat_info.map((chat, index) => ({
+            id: chat.project_id,
+            title: chat.project_name,
+            isActive: index === 0, // Make the first chat active by default
+            projectId: chat.project_id
+          }));
+          setChats(formattedChats);
+          if (formattedChats.length > 0) {
+            setActiveChatId(formattedChats[0].id);
+          }
+        } else {
+          console.error("Failed to load chat info", data);
+        }
+      } catch (err) {
+        console.error("Error fetching chats:", err);
+      }
+    };
+
+    if (user?.user_id) {
+      fetchChats();
+    }
+  }, [user]);
 
   const [messages, setMessages] = useState([]);
+  const [lastSelectedModel, setLastSelectedModel] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -49,7 +96,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 
       // Add new chat to the list
       const newChat = {
-        id: chats.length + 1,
+        id: returnedProjectId,
         title: projectName,
         isActive: false,
         projectId: returnedProjectId
@@ -58,26 +105,81 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     } catch (error) {
       console.error('Error creating project:', error);
       // Still add the chat locally even if API fails
+      const fallbackProjectId = `project-${Date.now()}`;
       const newChat = {
-        id: chats.length + 1,
+        id: fallbackProjectId,
         title: `Chat ${chats.length + 1}`,
-        isActive: false
+        isActive: false,
+        projectId: fallbackProjectId
       };
       setChats(prev => [...prev, newChat]);
     }
   };
 
-  const handleChatSelect = (chatId) => {
-    setChats(prev => prev.map(chat => ({
-      ...chat,
-      isActive: chat.id === chatId
-    })));
-    // In a real app, you would load messages for the selected chat
+  const handleChatSelect = async (chatId) => {
+    // Set active chat in sidebar
+    setChats((prev) =>
+      prev.map((chat) => ({
+        ...chat,
+        isActive: chat.id === chatId,
+      }))
+    );
+    setActiveChatId(chatId);
+    setMessages([]);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:8000/fetch-user-chat-details", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          project_id: chatId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success" && Array.isArray(data.chat_details)) {
+        const formattedMessages = data.chat_details.flatMap((detail) => {
+          const time = new Date(detail.message_created_at).toLocaleTimeString();
+          return [
+            {
+              content: detail.user_query,
+              isUser: true,
+              timestamp: time,
+            },
+            {
+              content: detail.agent_response,
+              isUser: false,
+              timestamp: time,
+            },
+          ];
+        });
+
+        setMessages(formattedMessages);
+      } else {
+        setMessages([]); // No messages or error
+        console.warn("No chat details found or API returned error.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch chat details:", error);
+      setMessages([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendMessage = async (messageData) => {
+    // Store the selected model for email functionality
+    if (messageData.model) {
+      setLastSelectedModel(messageData.model);
+    }
+    
     // Get the active chat to retrieve project ID
-    const activeChat = chats.find(chat => chat.isActive);
+    const activeChat = chats.find(chat => chat.id === activeChatId);
     if (!activeChat) {
       console.error('No active chat found');
       return;
@@ -87,9 +189,9 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     const userMessage = {
       id: Date.now(),
       ...messageData,
-      isUser: true
+      isUser: true,
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
@@ -108,9 +210,9 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          project_id: activeChat.projectId,
+          project_id: activeChat.projectId || activeChat.id,
           project_name: activeChat.title,
-          conversation_id: activeChat.projectId,
+          conversation_id: activeChat.projectId || activeChat.id,
           model_type: messageData.model?.model_type || 'openai',
           model_id: messageData.model?.model_name || messageData.model?.model_id || 'gpt-4o',
           temperature: 0.2,
@@ -265,7 +367,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         <Sidebar>
           <SidebarHeader onNewChat={handleNewChat} />
           <SidebarContent>
-            {chats.map(chat => (
+            {chats.map((chat) => (
               <SidebarItem
                 key={chat.id}
                 isActive={chat.isActive}
@@ -284,7 +386,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
             <HeaderLogo>SprintSeed</HeaderLogo>
             <HeaderContent>
               <span className="text-sm text-muted-foreground">
-                Welcome, {user?.first_name || 'User'}!
+                Welcome, {user?.first_name || "User"}!
               </span>
               <button
                 onClick={onLogout}
@@ -301,7 +403,18 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           {/* Chat Input */}
           <ChatInput
             onSendMessage={handleSendMessage}
-            onSendEmail={onSendEmail}
+            onSendEmail={() => {
+              const activeChat = chats.find(chat => chat.id === activeChatId);
+              if (activeChat) {
+                onSendEmail({
+                  projectId: activeChat.projectId || activeChat.id,
+                  conversationId: activeChat.projectId || activeChat.id,
+                  model: lastSelectedModel
+                });
+              } else {
+                alert('Please select a chat first');
+              }
+            }}
             disabled={isLoading}
           />
         </MainContent>
@@ -311,4 +424,3 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 };
 
 export default ChatPage;
-

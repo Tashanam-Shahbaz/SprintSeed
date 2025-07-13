@@ -1,46 +1,8 @@
 {
-  "hash": "9f536ef7",
-  "configHash": "b73e0997",
-  "lockfileHash": "d1f0b591",
-  "browserHash": "41d04012",
-  "optimized": {
-    "react": {
-      "src": "../../node_modules/react/index.js",
-      "file": "react.js",
-      "fileHash": "cd2fd794",
-      "needsInterop": true
-    },
-    "react-dom/client": {
-      "src": "../../node_modules/react-dom/client.js",
-      "file": "react-dom_client.js",
-      "fileHash": "3dd24baf",
-      "needsInterop": true
-    },
-    "lucide-react": {
-      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
-      "file": "lucide-react.js",
-      "fileHash": "f7129652",
-      "needsInterop": false
-    },
-    "clsx": {
-      "src": "../../node_modules/clsx/dist/clsx.mjs",
-      "file": "clsx.js",
-      "fileHash": "c337d196",
-      "needsInterop": false
-    },
-    "tailwind-merge": {
-      "src": "../../node_modules/tailwind-merge/dist/bundle-mjs.mjs",
-      "file": "tailwind-merge.js",
-      "fileHash": "c56c2e65",
-      "needsInterop": false
-    }
-  },
-  "chunks": {
-    "chunk-TVFQMRVC": {
-      "file": "chunk-TVFQMRVC.js"
-    },
-    "chunk-G3PMV62Z": {
-      "file": "chunk-G3PMV62Z.js"
-    }
-  }
+  "hash": "e753796e",
+  "configHash": "68b7148b",
+  "lockfileHash": "ca3cc883",
+  "browserHash": "38c24ff0",
+  "optimized": {},
+  "chunks": {}
 }

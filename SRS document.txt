@@ -1,12 +1,12 @@
-1.  **Project Overview and Scope:** Develop a web-based project management application for creating, visualizing, and dynamically modifying project timelines.
-2.  **Primary Objectives and Success Criteria:** The system's core function will be to allow users to compress or expand an entire project timeline (e.g., from 8 weeks to 2 weeks), with the system automatically recalculating all dependent task durations and deadlines.
-3.  **Key Stakeholders and Target Users:** The primary users will be project managers, team leads, and executives who require agile planning and rapid rescheduling capabilities.
-4.  **Core Functional Requirements:** Key features include a visual Gantt chart interface, drag-and-drop task management, a dedicated "Timeline Resizer" function, and automated dependency conflict warnings.
-5.  **Technical Stack Recommendations:** A responsive frontend (e.g., React, Vue.js), a scalable backend (e.g., Node.js, Python), and a relational database (e.g., PostgreSQL) are recommended.
-6.  **Data Management Approach:** All project, task, and dependency data will be stored in a structured relational database, ensuring data integrity during timeline modification operations.
-7.  **Integration Requirements with Existing Systems:** Plan for future API-based integrations with common calendar services (Google Calendar, Outlook) and issue trackers (Jira).
-8.  **Security and Compliance Considerations:** Implement role-based access control (RBAC) to restrict timeline modification privileges and ensure all data is encrypted in transit and at rest.
-9.  **Potential Challenges or Constraints:** The main technical challenge is creating a robust algorithm that can logically and proportionally adjust all task durations and dependencies when a timeline is drastically compressed.
-10. **Quality Assurance Approach:** Testing will be heavily focused on validating the data integrity and logical correctness of the timeline recalculation engine under various scenarios.
+1.  **Project Overview and Scope:** The project will create a Minimum Viable Product (MVP) of a "Project Launch Countdown" application, drastically reducing the feature set from an original 8-week plan to fit the new 2-week timeline.
+2.  **Primary Objectives and Success Criteria:** The sole objective is to deploy a core-functional application within 10 business days; success is defined by the live operation of the countdown timer and a basic task list.
+3.  **Key Stakeholders and Target Users:** Stakeholders are the project leadership team, and users are internal team members who need to track the launch date and associated tasks.
+4.  **Core Functional Requirements:** The system will feature a configurable countdown timer, a minimal CRUD (Create, Read, Update, Delete) task list, and a single-user authentication model.
+5.  **Technical Stack Recommendations:** A rapid-development stack like MERN (MongoDB, Express.js, React, Node.js) or a serverless framework is required to meet the deadline.
+6.  **Data Management Approach:** A simple NoSQL database will be used to store the target date, task items, and user credentials.
+7.  **Integration Requirements with Existing Systems:** All external integrations, such as advanced email notifications or calendar syncs from the original plan, will be postponed to a future version.
+8.  **Security and Compliance Considerations:** Basic security (HTTPS, password hashing) will be implemented, but comprehensive security audits are out of scope for this 2-week sprint.
+9.  **Potential Challenges or Constraints:** The primary constraint is the hyper-compressed 2-week timeline, which eliminates any buffer for unforeseen issues and mandates a ruthless reduction in scope and testing.
+10. **Quality Assurance Approach:** Testing will be limited to developer-led unit tests and a single, final user acceptance testing (UAT) session, forgoing any automated end-to-end or performance testing.
 
 [To generate the complete SRS document based on this plan, please reply with 'Generate SRS' or suggest changes to the points above.]

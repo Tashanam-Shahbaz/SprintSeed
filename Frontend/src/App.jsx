@@ -10,6 +10,7 @@ function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [activeChatData, setActiveChatData] = useState(null);
 
   const handleLogin = (userData) => {
     if (!userData) return;
@@ -32,7 +33,8 @@ function App() {
     localStorage.removeItem("user");
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = (chatData) => {
+    setActiveChatData(chatData);
     setIsEmailModalOpen(true);
   };
 
@@ -68,6 +70,9 @@ function App() {
             isOpen={isEmailModalOpen}
             onClose={handleEmailModalClose}
             onSend={handleEmailSend}
+            projectId={activeChatData?.projectId}
+            conversationId={activeChatData?.conversationId}
+            selectedModel={activeChatData?.model}
           />
         </>
       )}

@@ -19,6 +19,11 @@ class UserLogin(BaseModel):
     email:str
     password: str
 
+class EmailRequest(BaseModel):
+    subject: str
+    body: str
+    recipient: EmailStr
+
 
 class SRSGeneratorRequest(BaseModel):
     project_id: str = Field(..., description="Unique identifier for the project")
@@ -64,5 +69,9 @@ class TaskCreatorAgentRequest(BaseModel):
     temperature: Optional[float] = Field(default=0.2, description="Temperature setting for the model")
 
 class FetchUserChatInfoRequest(BaseModel):
+    user_id: str = Field(..., description="Unique identifier for the user")
+    # project_id: str = Field(..., description="Unique identifier for the project")
+
+class FetchUserChatDetailRequest(BaseModel):
     user_id: str = Field(..., description="Unique identifier for the user")
     project_id: str = Field(..., description="Unique identifier for the project")
