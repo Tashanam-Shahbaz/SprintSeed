@@ -9,7 +9,7 @@ import uuid
 import traceback
 from typing import List, Optional
 from models import (
-    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,
+    UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest, FetchUserChatDetailRequest,
     TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
 
@@ -226,7 +226,8 @@ def create_project(
         db_obj.insert_conversation(
             conversation_id=creat_project.conversation_id,
             project_id=creat_project.project_id,
-            chat_type=creat_project.chat_type
+            chat_type=creat_project.chat_type,
+            user_id  = creat_project.user_id
         )
         project_id=creat_project.project_id
         return JSONResponse(
@@ -301,7 +302,8 @@ def generate_srs_proposal(request: Request, agent_request: SRSGeneratorRequest):
         db_obj.insert_conversation(
             conversation_id=agent_request.conversation_id,
             project_id=agent_request.project_id,
-            chat_type=agent_request.chat_type
+            chat_type=agent_request.chat_type,
+            user_id=agent_request.user_id
         )
 
         #Read Files
@@ -416,6 +418,21 @@ async def email_summary_generator(agent_request: EmailSummaryGeneratorRequest):
     except Exception as e:
         logger.error(f"Error in email summary generator: {str(e)}")
         return handle_api_error(e)
+    
+@app.post("/send-email")
+async def send_email_api(email_request: EmailRequest):
+    try:
+        await send_email(
+            subject=email_request.subject,
+            body=email_request.body,
+            reciever=email_request.recipient
+        )
+        return JSONResponse(
+            content={"message": "Email sent successfully"},
+            status_code=200
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
 
 @app.get("/models")
 async def get_models():
@@ -484,8 +501,8 @@ async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
 
         if not chat_info:
             return JSONResponse(
-                content={"status": "error", "message": "No chat information found for the user"},
-                status_code=404
+                content={"status": "success", "message": "No chat information found for the user"},
+                status_code=200
             )
 
         return JSONResponse(
@@ -498,7 +515,7 @@ async def fetch_user_chat_info(request: FetchUserChatInfoRequest):
         return handle_api_error(e)
     
 @app.post("/fetch-user-chat-details")
-async def fetch_user_chat_details(request: FetchUserChatInfoRequest):
+async def fetch_user_chat_details(request: FetchUserChatDetailRequest):
     try:
         user_id = request.user_id
         project_id = request.project_id

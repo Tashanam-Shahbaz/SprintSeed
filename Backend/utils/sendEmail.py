@@ -9,10 +9,10 @@ EMAIL_PASS = os.getenv("EMAIL_PASS")
 HOST_NAME=os.getenv("HOST_NAME")
 PORT=os.getenv("PORT")
 
-async def send_email(subject: str, body: str):
+async def send_email(subject: str, body: str,reciever:str):
     message = EmailMessage()
-    message["From"] = "no-reply@example.com"         
-    message["To"] = "khadij70707@gmail.com"
+    message["From"] = "khadij70707@gmail.com"         
+    message["To"] = reciever
     message["Subject"] = subject
     message.set_content(body)
 
