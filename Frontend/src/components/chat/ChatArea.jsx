@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { Loader2 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 
-const ChatArea = ({ messages }) => {
+const ChatArea = ({ messages, isLoading = false }) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -14,7 +15,7 @@ const ChatArea = ({ messages }) => {
 
   return (
     <div className="flex-1 overflow-y-auto bg-background">
-      {messages.length === 0 ? (
+      {messages.length === 0 && !isLoading ? (
         <div className="flex items-center justify-center h-full">
           <div className="text-center max-w-md">
             <div className="sprintseed-logo inline-block text-3xl mb-4">
@@ -31,6 +32,15 @@ const ChatArea = ({ messages }) => {
         </div>
       ) : (
         <div className="max-w-4xl mx-auto">
+          {isLoading && messages.length === 0 && (
+            <div className="flex items-center justify-center p-8">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Loading chat history...</span>
+              </div>
+            </div>
+          )}
+          
           {messages.map((message) => (
             <ChatMessage
               key={message.id || message.timestamp}
@@ -46,4 +56,3 @@ const ChatArea = ({ messages }) => {
 };
 
 export default ChatArea;
-

@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { Send, Paperclip, X } from "lucide-react";
+import { Send, Paperclip, X, HandMetal } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
 import { cn } from "../../lib/utils";
+import Notification from "../ui/Notification";
 
 const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
   const [message, setMessage] = useState("");
   const [attachedFile, setAttachedFile] = useState(null);
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [showModelWarning, setShowModelWarning] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!message.trim()) return;
+
+    if (!selectedModel) {
+      setShowModelWarning(true);
+      // Auto-hide the warning after 5 seconds
+      setTimeout(() => setShowModelWarning(false), 5000);
+      return;
+    }
+    // Hide warning if it was showing
+    setShowModelWarning(false);
     if ((message.trim() || attachedFile) && selectedModel) {
       onSendMessage({
         content: message.trim(),
@@ -37,6 +49,11 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
     setAttachedFile(null);
   };
 
+  const handleModelSelect = (model) => {
+    setSelectedModel(model);
+    setShowModelWarning(false); // Hide warning when model is selected
+  };
+
   useEffect(() => {
     const fetchModels = async () => {
       try {
@@ -55,13 +72,24 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
 
   return (
     <div className="border-t border-border bg-background p-4">
+      {/* Model Selection Warning */}
+      {showModelWarning && (
+        <div className="mb-4">
+          <Notification
+            message="Please select a model before sending your message."
+            type="warning"
+            onClose={() => setShowModelWarning(false)}
+            className="animate-in slide-in-from-bottom-2 duration-300"
+          />
+        </div>
+      )}
       {/* Model Selection */}
       <div className="flex gap-2 mb-4 flex-wrap">
         {models.map((model) => (
           <button
             key={model.model_id}
             type="button"
-            onClick={() => setSelectedModel(model)}
+            onClick={() => handleModelSelect(model)}
             className={cn(
               "model-tag px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-200 transform",
               selectedModel?.model_id === model.model_id
