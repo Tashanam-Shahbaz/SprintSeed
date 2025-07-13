@@ -21,7 +21,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       // Generate unique project ID
       const projectId = `project-${Date.now()}`;
       const projectName = `Project ${chats.length + 1}`;
-      
+      console.log(user)
       // Create project via API
       const response = await fetch('http://localhost:8000/create-project', {
         method: 'POST',
@@ -33,7 +33,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           project_name: projectName,
           conversation_id: projectId,
           chat_type: "srs_document",
-          user_id: user?.id 
+          user_id: user?.user_id 
         })
       });
 
@@ -117,7 +117,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           user_query: messageData.content,
           file_ids: fileIds,
           chat_type: "srs_document",
-          user_id: user?.id
+          user_id: user?.user_id
         })
       });
 
