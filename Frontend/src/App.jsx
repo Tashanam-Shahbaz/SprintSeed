@@ -3,6 +3,8 @@ import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
 import EmailModal from "./components/email/EmailModal";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -45,7 +47,7 @@ function App() {
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        alert(`Email sent successfully to ${emailData.recipient}!`);
+        toast.success(`Email sent successfully to ${emailData.recipient}!`);
         resolve();
       }, 1000);
     });
@@ -76,6 +78,18 @@ function App() {
           />
         </>
       )}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

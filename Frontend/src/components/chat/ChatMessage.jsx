@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
 import { cn } from '../../lib/utils';
 import jsPDF from 'jspdf';
+import { toast } from 'react-toastify';
 
 const ChatMessage = ({ message, isUser = false }) => {
   const [isDownloading, setIsDownloading] = React.useState(false);
@@ -193,7 +194,7 @@ const ChatMessage = ({ message, isUser = false }) => {
         console.log('Fallback: Downloaded as markdown file');
       } catch (fallbackError) {
         console.error('Fallback download also failed:', fallbackError);
-        alert('Failed to download document. Please try again.');
+        toast.error('Failed to download document. Please try again.');
       }
     } finally {
       setIsDownloading(false);

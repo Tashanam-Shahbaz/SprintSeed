@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Send, Paperclip, X } from "lucide-react";
+import { Send, Paperclip, X, Mail } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
 import { cn } from "../../lib/utils";
+import { toast } from 'react-toastify';
 
 const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
   const [message, setMessage] = useState("");
@@ -22,7 +23,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
       setMessage("");
       setAttachedFile(null);
     } else if (!selectedModel) {
-      alert("Please select a model before sending a message.");
+      toast.warning("Please select a model before sending a message.");
     }
   };
 
@@ -116,7 +117,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
           </label>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
           <Button
             type="submit"
             disabled={disabled || (!message.trim() && !attachedFile)}
@@ -132,7 +133,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
             className="send-email-button h-[60px] px-4 text-xs font-medium"
             variant="accent"
           >
-            SEND EMAIL
+            <Mail className="h-4 w-4" />
           </Button>
         </div>
       </form>

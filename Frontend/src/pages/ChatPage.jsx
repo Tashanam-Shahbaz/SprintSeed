@@ -13,6 +13,7 @@ import {
 } from "../components/layout/Sidebar";
 import ChatArea from "../components/chat/ChatArea";
 import ChatInput from "../components/chat/ChatInput";
+import { toast } from 'react-toastify';
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
   const [chats, setChats] = useState([]);
@@ -412,7 +413,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
                   model: lastSelectedModel
                 });
               } else {
-                alert('Please select a chat first');
+                toast.warning('Please select a chat first');
               }
             }}
             disabled={isLoading}

@@ -8,6 +8,7 @@ import {
   ModalFooter 
 } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { toast } from 'react-toastify';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 
@@ -82,7 +83,7 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
       // Check file size (limit to 25MB)
       const maxSize = 25 * 1024 * 1024; // 25MB in bytes
       if (file.size > maxSize) {
-        alert('File size must be less than 25MB');
+        toast.error('File size must be less than 25MB');
         e.target.value = ''; // Reset the input
         return;
       }
@@ -102,7 +103,7 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!emailData.recipient.trim()) {
-      alert('Please enter a recipient email address');
+      toast.warning('Please enter a recipient email address');
       return;
     }
 
@@ -144,10 +145,10 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
       setAttachment(null);
       onClose();
       
-      alert(`Email sent successfully${hadAttachment ? ' with attachment' : ''}!`);
+      toast.success(`Email sent successfully${hadAttachment ? ' with attachment' : ''}!`);
     } catch (error) {
       console.error('Failed to send email:', error);
-      alert('Failed to send email. Please try again.');
+      toast.error('Failed to send email. Please try again.');
     } finally {
       setIsLoading(false);
     }
