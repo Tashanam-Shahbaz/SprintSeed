@@ -201,3 +201,22 @@ ADD COLUMN technical_requirements TEXT;
 -- Add acceptance_criteria column to tasks table
 ALTER TABLE task_management.tasks 
 ADD COLUMN acceptance_criteria TEXT
+
+
+INSERT INTO task_management.users (
+    user_id,
+    username,
+    email,
+    password,
+    first_name,
+    last_name,
+    role_id
+) VALUES (
+    'admin-002',
+    'admin',
+    'admin@example.com',
+    'pasword',
+    'Admin',
+    'User',
+    '1'  -- Project Manager role
+);

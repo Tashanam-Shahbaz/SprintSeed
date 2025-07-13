@@ -1,4 +1,4 @@
-# 🚀 SprintSpeed
+# 🚀 SprintSeed
 
 **AI-powered platform to streamline software planning — from requirement intake to executive-ready summaries.**
 
@@ -6,9 +6,9 @@
 
 ## 🌍 Overview
 
-SprintSpeed is designed to automate and accelerate early-stage software planning. Traditionally, converting a CEO's idea into an actionable plan requires several cycles between the CEO, Business Analysts (BAs), and Project Managers — costing time, effort, and clarity.
+SprintSeed is designed to automate and accelerate early-stage software planning. Traditionally, converting a CEO's idea into an actionable plan requires several cycles between the CEO, Business Analysts (BAs), and Project Managers — costing time, effort, and clarity.
 
-SprintSpeed reduces this friction by allowing users (e.g., stakeholders, managers, or clients) to upload a prompt or document. AI agents then:
+SprintSeed reduces this friction by allowing users (e.g., stakeholders, managers, or clients) to upload a prompt or document. AI agents then:
 
 * Understand and translate the input into a structured **Software Requirements Specification (SRS)**.
 * Iterate with human feedback for refinements.
