@@ -258,7 +258,6 @@ const EmailModal = ({
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                 <span className="text-sm text-muted-foreground">
-                  Generating email summary...
                 </span>
               </div>
             </div>
