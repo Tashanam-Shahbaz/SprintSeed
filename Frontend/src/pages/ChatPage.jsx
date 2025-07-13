@@ -1,42 +1,63 @@
-import React, { useState } from 'react';
-import { Layout, LayoutContent, MainContent } from '../components/layout/Layout';
-import { Header, HeaderLogo, HeaderContent } from '../components/layout/Header';
-import { Sidebar, SidebarHeader, SidebarContent, SidebarItem } from '../components/layout/Sidebar';
-import ChatArea from '../components/chat/ChatArea';
-import ChatInput from '../components/chat/ChatInput';
+import React, { useState, useEffect } from "react";
+import {
+  Layout,
+  LayoutContent,
+  MainContent,
+} from "../components/layout/Layout";
+import { Header, HeaderLogo, HeaderContent } from "../components/layout/Header";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarItem,
+} from "../components/layout/Sidebar";
+import ChatArea from "../components/chat/ChatArea";
+import ChatInput from "../components/chat/ChatInput";
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
-  const [chats, setChats] = useState([
-    { id: 1, title: 'Chat 1', isActive: true },
-    { id: 2, title: 'Chat 2', isActive: false },
-    { id: 3, title: 'Chat 3', isActive: false },
-  ]);
+  const [chats, setChats] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
 
-  const [messages, setMessages] = useState([
-    {
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam diam arcu, dignissim sed sapien in, sagittis pellentesque risus. Cras augue mauris, tempus pretium placerat non, finibus luctus tortor. Phasellus laoreet sodales odio, eu fringilla elit placerat sit amet. Praesent elementum risus nunc, id bibendum orci molestie ac. Nunc eleifend quam ac ex pharetr",
-      isUser: false,
-      timestamp: "10:30 AM",
-      document: {
-        id: "srs-001",
-        description: "Software Requirements Specification for Project Management System"
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/fetch-user-chat-info", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.user_id,
+            project_id: "",
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success" && Array.isArray(data.chat_info)) {
+          const formattedChats = data.chat_info.map((chat, index) => ({
+            id: chat.project_id,
+            title: chat.project_name,
+            isActive: index === 0, // Make the first chat active by default
+          }));
+          setChats(formattedChats);
+          if (formattedChats.length > 0) {
+            setActiveChatId(formattedChats[0].id);
+          }
+        } else {
+          console.error("Failed to load chat info", data);
+        }
+      } catch (err) {
+        console.error("Error fetching chats:", err);
       }
-    },
-    {
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam diam arcu, dignissim sed sa",
-      isUser: false,
-      timestamp: "10:32 AM"
-    },
-    {
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam diam arcu, dignissim sed sapien in, sagittis pellentesque risus. Cras augue mauris, tempus pretium placerat non, finibus luctus tortor. Phasellus laoreet sodales odio, eu fringilla elit placerat sit amet. Praesent elementum risus nunc, id bibendum orci molestie ac. Nunc eleifend quam ac ex pharetr",
-      isUser: false,
-      timestamp: "10:35 AM",
-      document: {
-        id: "srs-002",
-        description: "Updated SRS Document with Additional Requirements"
-      }
+    };
+
+    if (user?.user_id) {
+      fetchChats();
     }
-  ]);
+  }, [user]);
+
+  const [messages, setMessages] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,40 +65,89 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     const newChat = {
       id: chats.length + 1,
       title: `Chat ${chats.length + 1}`,
-      isActive: false
+      isActive: false,
     };
-    setChats(prev => [...prev, newChat]);
+    setChats((prev) => [...prev, newChat]);
   };
 
-  const handleChatSelect = (chatId) => {
-    setChats(prev => prev.map(chat => ({
-      ...chat,
-      isActive: chat.id === chatId
-    })));
-    // In a real app, you would load messages for the selected chat
+  const handleChatSelect = async (chatId) => {
+    // Set active chat in sidebar
+    setChats((prev) =>
+      prev.map((chat) => ({
+        ...chat,
+        isActive: chat.id === chatId,
+      }))
+    );
+    setActiveChatId(chatId);
+    setMessages([]);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:8000/fetch-user-chat-details", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          project_id: chatId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success" && Array.isArray(data.chat_details)) {
+        const formattedMessages = data.chat_details.flatMap((detail) => {
+          const time = new Date(detail.message_created_at).toLocaleTimeString();
+          return [
+            {
+              content: detail.user_query,
+              isUser: true,
+              timestamp: time,
+            },
+            {
+              content: detail.agent_response,
+              isUser: false,
+              timestamp: time,
+            },
+          ];
+        });
+
+        setMessages(formattedMessages);
+      } else {
+        setMessages([]); // No messages or error
+        console.warn("No chat details found or API returned error.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch chat details:", error);
+      setMessages([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendMessage = async (messageData) => {
     // Add user message
     const userMessage = {
       ...messageData,
-      isUser: true
+      isUser: true,
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     // Simulate AI response
     setTimeout(() => {
       const aiResponse = {
-        content: "I've analyzed your requirements and generated a comprehensive SRS document. The document includes functional requirements, non-functional requirements, system architecture, and user interface specifications.",
+        content:
+          "I've analyzed your requirements and generated a comprehensive SRS document. The document includes functional requirements, non-functional requirements, system architecture, and user interface specifications.",
         isUser: false,
         timestamp: new Date().toLocaleTimeString(),
         document: {
           id: `srs-${Date.now()}`,
-          description: "Generated SRS Document based on your requirements"
-        }
+          description: "Generated SRS Document based on your requirements",
+        },
       };
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages((prev) => [...prev, aiResponse]);
       setIsLoading(false);
     }, 2000);
   };
@@ -89,7 +159,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         <Sidebar>
           <SidebarHeader onNewChat={handleNewChat} />
           <SidebarContent>
-            {chats.map(chat => (
+            {chats.map((chat) => (
               <SidebarItem
                 key={chat.id}
                 isActive={chat.isActive}
@@ -108,7 +178,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
             <HeaderLogo>SprintSeed</HeaderLogo>
             <HeaderContent>
               <span className="text-sm text-muted-foreground">
-                Welcome, {user?.first_name || 'User'}!
+                Welcome, {user?.first_name || "User"}!
               </span>
               <button
                 onClick={onLogout}
@@ -135,4 +205,3 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 };
 
 export default ChatPage;
-
