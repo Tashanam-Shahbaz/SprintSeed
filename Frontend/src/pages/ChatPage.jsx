@@ -120,6 +120,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           user_id: user?.user_id
         })
       });
+      console.log("RESponse:", response)
 
       if (!response.ok) {
         throw new Error('Failed to generate SRS proposal');
@@ -143,7 +144,10 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
 
       // Handle streaming response
       const reader = response.body.getReader();
+      console.log("GEt:",reader.read())
       const decoder = new TextDecoder();
+      console.log("text:",decoder)
+      let fullMessage = "";
       let accumulatedContent = "";
       let buffer = "";
 
@@ -153,48 +157,49 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         if (done) break;
         
         const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+        console.log("chunk",chunk)
+        // buffer += chunk;
         
-        // Process complete lines from buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ""; // Keep incomplete line in buffer
+        // // Process complete lines from buffer
+        // const lines = buffer.split('\n');
+        // buffer = lines.pop() || ""; // Keep incomplete line in buffer
         
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            // Extract content after "data: " prefix
-            const content = line.substring(6);
-            if (content.trim()) {
-              // Add the content directly
-              accumulatedContent += content;
+        // for (const line of lines) {
+        //   if (line.startsWith('data: ')) {
+        //     // Extract content after "data: " prefix
+        //     const content = line.substring(6);
+        //     if (content.trim()) {
+        //       // Add the content directly
+        //       accumulatedContent += content;
               
-              // Apply minimal formatting - just add line breaks for readability
-              let formattedContent = accumulatedContent;
+        //       // Apply minimal formatting - just add line breaks for readability
+        //       let formattedContent = accumulatedContent;
               
-              // Add line breaks before numbered lists
-              formattedContent = formattedContent.replace(/([.!?])\s*(\d+\.\s+[A-Z])/g, '$1\n\n$2');
+        //       // Add line breaks before numbered lists
+        //       formattedContent = formattedContent.replace(/([.!?])\s*(\d+\.\s+[A-Z])/g, '$1\n\n$2');
               
-              // Add line breaks before major sections (without adding markdown syntax)
-              formattedContent = formattedContent.replace(/([.!?])\s*(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)/g, '$1\n\n$2');
+        //       // Add line breaks before major sections (without adding markdown syntax)
+        //       formattedContent = formattedContent.replace(/([.!?])\s*(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)/g, '$1\n\n$2');
               
-              // Add line breaks before STAGE headers (without adding markdown syntax)
-              formattedContent = formattedContent.replace(/([.!?])\s*(STAGE \d+:)/g, '$1\n\n$2');
+        //       // Add line breaks before STAGE headers (without adding markdown syntax)
+        //       formattedContent = formattedContent.replace(/([.!?])\s*(STAGE \d+:)/g, '$1\n\n$2');
               
-              // Add proper spacing for bullet points
-              formattedContent = formattedContent.replace(/([.!?])\s*(-\s+)/g, '$1\n\n$2');
+        //       // Add proper spacing for bullet points
+        //       formattedContent = formattedContent.replace(/([.!?])\s*(-\s+)/g, '$1\n\n$2');
               
-              // Clean up multiple line breaks
-              formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
-              formattedContent = formattedContent.replace(/^\n+/, '');
+        //       // Clean up multiple line breaks
+        //       formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
+        //       formattedContent = formattedContent.replace(/^\n+/, '');
               
-              // Update the AI message with formatted content
-              setMessages(prev => prev.map(msg => 
-                msg.id === aiMessageId 
-                  ? { ...msg, content: formattedContent }
-                  : msg
-              ));
-            }
-          }
-        }
+        //       // Update the AI message with formatted content
+        //       setMessages(prev => prev.map(msg => 
+        //         msg.id === aiMessageId 
+        //           ? { ...msg, content: formattedContent }
+        //           : msg
+        //       ));
+        //     }
+        //   }
+        // }
       }
 
       // Process any remaining buffer content
