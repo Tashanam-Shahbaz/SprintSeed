@@ -1,22 +1,29 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Send, Mail, Paperclip, X } from 'lucide-react';
-import { 
-  Modal, 
-  ModalHeader, 
-  ModalTitle, 
-  ModalContent, 
-  ModalFooter 
-} from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { toast } from 'react-toastify';
-import { Input } from '../ui/Input';
-import { Textarea } from '../ui/Textarea';
+import React, { useState, useEffect, useCallback } from "react";
+import { Send, Mail, Paperclip, X } from "lucide-react";
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalContent,
+  ModalFooter,
+} from "../ui/Modal";
+import { Button } from "../ui/Button";
+import { toast } from "react-toastify";
+import { Input } from "../ui/Input";
+import { Textarea } from "../ui/Textarea";
 
-const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, selectedModel }) => {
+const EmailModal = ({
+  isOpen,
+  onClose,
+  onSend,
+  projectId,
+  conversationId,
+  selectedModel,
+}) => {
   const [emailData, setEmailData] = useState({
-    recipient: '',
-    subject: '',
-    message: ''
+    recipient: "",
+    subject: "",
+    message: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -26,38 +33,42 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
   const generateEmailSummary = useCallback(async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:8000/email-summary-generator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          project_id: projectId,
-          conversation_id: conversationId,
-          chat_type: "email_summary",
-          model_type: selectedModel?.model_type,
-          model_id: selectedModel?.model_name,
-          temperature: 0.2
-        })
-      });
+      const response = await fetch(
+        "http://localhost:8000/email-summary-generator",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            project_id: projectId,
+            conversation_id: conversationId,
+            chat_type: "email_summary",
+            model_type: selectedModel?.model_type,
+            model_id: selectedModel?.model_name,
+            temperature: 0.2,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to generate email summary');
+        throw new Error("Failed to generate email summary");
       }
 
       const data = await response.json();
-      setEmailData(prev => ({
+      setEmailData((prev) => ({
         ...prev,
-        subject: data.subject || 'SRS Document from SprintSeed',
-        message: data.body || ''
+        subject: data.subject || "SRS Document from SprintSeed",
+        message: data.body || "",
       }));
     } catch (error) {
-      console.error('Error generating email summary:', error);
+      console.error("Error generating email summary:", error);
       // Set default values if API fails
-      setEmailData(prev => ({
+      setEmailData((prev) => ({
         ...prev,
-        subject: 'SRS Document from SprintSeed',
-        message: 'Please find attached the SRS document generated for your project.'
+        subject: "SRS Document from SprintSeed",
+        message:
+          "Please find attached the SRS document generated for your project.",
       }));
     } finally {
       setIsGenerating(false);
@@ -71,9 +82,9 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
   }, [isOpen, projectId, conversationId, generateEmailSummary]);
 
   const handleChange = (e) => {
-    setEmailData(prev => ({
+    setEmailData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -83,8 +94,8 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
       // Check file size (limit to 25MB)
       const maxSize = 25 * 1024 * 1024; // 25MB in bytes
       if (file.size > maxSize) {
-        toast.error('File size must be less than 25MB');
-        e.target.value = ''; // Reset the input
+        toast.error("File size must be less than 25MB");
+        e.target.value = ""; // Reset the input
         return;
       }
       setAttachment(file);
@@ -94,40 +105,51 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
   const removeAttachment = () => {
     setAttachment(null);
     // Reset the file input
-    const fileInput = document.getElementById('attachment');
+    const fileInput = document.getElementById("attachment");
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!emailData.recipient.trim()) {
-      toast.warning('Please enter a recipient email address');
+      toast.warning("Please enter a recipient email address");
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Prepare FormData for send-email API (to support file attachments)
-      const formData = new FormData();
-      formData.append('subject', emailData.subject);
-      formData.append('body', emailData.message);
-      formData.append('recipient', emailData.recipient);
-      
-      // Add attachment if present
-      if (attachment) {
-        formData.append('attachment', attachment);
-      }
-      
-      const response = await fetch('http://localhost:8000/send-email', {
-        method: 'POST',
-        body: formData // Using FormData instead of JSON to support file uploads
+      // const formData = new FormData();
+      // formData.append('subject', emailData.subject);
+      // formData.append('body', emailData.message);
+      // formData.append('recipient', emailData.recipient);
+
+      // // Add attachment if present
+      // if (attachment) {
+      //   formData.append('attachment', attachment);
+      // }
+
+      // const response = await fetch('http://localhost:8000/send-email', {
+      //   method: 'POST',
+      //   body: formData // Using FormData instead of JSON to support file uploads
+      // });
+      const response = await fetch("http://localhost:8000/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: emailData.subject,
+          body: emailData.message,
+          recipient: emailData.recipient,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send email');
+        throw new Error("Failed to send email");
       }
 
       // Call the original onSend callback if provided
@@ -137,18 +159,20 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
 
       // Reset form
       setEmailData({
-        recipient: '',
-        subject: '',
-        message: ''
+        recipient: "",
+        subject: "",
+        message: "",
       });
       const hadAttachment = !!attachment;
       setAttachment(null);
       onClose();
-      
-      toast.success(`Email sent successfully${hadAttachment ? ' with attachment' : ''}!`);
+
+      toast.success(
+        `Email sent successfully${hadAttachment ? " with attachment" : ""}!`
+      );
     } catch (error) {
-      console.error('Failed to send email:', error);
-      toast.error('Failed to send email. Please try again.');
+      console.error("Failed to send email:", error);
+      toast.error("Failed to send email. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +206,9 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-muted-foreground">Generating email summary...</span>
+                <span className="text-sm text-muted-foreground">
+                  Generating email summary...
+                </span>
               </div>
             </div>
           )}
@@ -191,7 +217,10 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
             <>
               {/* Recipient Email */}
               <div className="space-y-2">
-                <label htmlFor="recipient" className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor="recipient"
+                  className="text-sm font-medium text-foreground"
+                >
                   Recipient Email <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -209,7 +238,10 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
 
               {/* Subject */}
               <div className="space-y-2">
-                <label htmlFor="subject" className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor="subject"
+                  className="text-sm font-medium text-foreground"
+                >
                   Subject
                 </label>
                 <Input
@@ -226,7 +258,10 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
 
               {/* Email Body */}
               <div className="space-y-2">
-                <label htmlFor="message" className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor="message"
+                  className="text-sm font-medium text-foreground"
+                >
                   Email Body
                 </label>
                 <Textarea
@@ -242,7 +277,10 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
 
               {/* Attachment */}
               <div className="space-y-2">
-                <label htmlFor="attachment" className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor="attachment"
+                  className="text-sm font-medium text-foreground"
+                >
                   Attachment (Optional)
                 </label>
                 <div className="space-y-3">
@@ -258,7 +296,9 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <Paperclip className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{attachment.name}</span>
+                        <span className="text-sm font-medium">
+                          {attachment.name}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           ({(attachment.size / 1024 / 1024).toFixed(2)} MB)
                         </span>
@@ -299,12 +339,12 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                {attachment ? 'Sending with attachment...' : 'Sending...'}
+                {attachment ? "Sending with attachment..." : "Sending..."}
               </>
             ) : (
               <>
                 <Send className="h-4 w-4" />
-                {attachment ? 'Send Email with Attachment' : 'Send Email'}
+                {attachment ? "Send Email with Attachment" : "Send Email"}
               </>
             )}
           </Button>
@@ -315,4 +355,3 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
 };
 
 export default EmailModal;
-

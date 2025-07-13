@@ -12,6 +12,7 @@ from models import (
     UserRegisterRequest, UserLogin , SRSGeneratorRequest , CreateProjectRequest,EmailRequest, FetchUserChatDetailRequest,
     TaskCreatorAgentRequest , EmailSummaryGeneratorRequest , FetchUserChatInfoRequest
 )
+from fastapi import Form, UploadFile, File
 
 
 from utils.chat_history_manager import ChatHistoryManager
@@ -39,7 +40,7 @@ allow_origins=["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
