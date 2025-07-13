@@ -212,9 +212,9 @@ INSERT INTO task_management.users (
     last_name,
     role_id
 ) VALUES (
-    'admin-001',
+    'admin-002',
     'admin',
-    'admin@expalm.com',
+    'admin@example.com',
     'pasword',
     'Admin',
     'User',
