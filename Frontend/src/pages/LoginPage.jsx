@@ -1,10 +1,11 @@
 import React from "react";
 import LoginForm from "../components/auth/LoginForm";
+import { getApiUrl } from '../config/api';
 
 const LoginPage = ({ onLogin }) => {
   const handleLogin = async (credentials) => {
     try {
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch(getApiUrl("login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),

@@ -14,6 +14,7 @@ import {
 import ChatArea from "../components/chat/ChatArea";
 import ChatInput from "../components/chat/ChatInput";
 import { toast } from 'react-toastify';
+import { getApiUrl } from '../config/api';
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
   const [chats, setChats] = useState([]);
@@ -22,7 +23,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const res = await fetch("http://localhost:8000/fetch-user-chat-info", {
+        const res = await fetch(getApiUrl("fetch-user-chat-info"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,7 +72,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       const projectName = `Project ${chats.length + 1}`;
       
       // Create project via API
-      const response = await fetch('http://localhost:8000/create-project', {
+      const response = await fetch(getApiUrl('create-project'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/fetch-user-chat-details", {
+      const res = await fetch(getApiUrl("fetch-user-chat-details"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -212,7 +213,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       }
 
       // Call the generate-srs-proposal API
-      const response = await fetch('http://localhost:8000/generate-srs-proposal', {
+      const response = await fetch(getApiUrl('generate-srs-proposal'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
