@@ -4,6 +4,7 @@ import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
 import { cn } from "../../lib/utils";
 import { toast } from 'react-toastify';
+import { getApiUrl } from '../../config/api';
 
 const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
   const [message, setMessage] = useState("");
@@ -41,7 +42,7 @@ const ChatInput = ({ onSendMessage, onSendEmail, disabled = false }) => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const res = await fetch("http://localhost:8000/models");
+        const res = await fetch(getApiUrl("models"));
         const data = await res.json();
         if (data.status === "success") {
           setModels(data.models);

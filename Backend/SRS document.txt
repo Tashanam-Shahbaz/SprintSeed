@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Here is the project plan for the Attendance Management System.
 
 1.  **Project Overview and Scope:** The project will create a centralized, web-based platform to automate employee attendance tracking, manage leave requests, and generate insightful reports for management.
@@ -12,3 +13,6 @@ Here is the project plan for the Attendance Management System.
 10. **Quality Assurance Approach:** A comprehensive testing strategy will be executed, including unit tests for business logic, integration tests for APIs, end-to-end automated tests for user flows, and a final User Acceptance Testing (UAT) phase.
 
 [To generate the complete SRS document based on this plan, please reply with 'Generate SRS' or suggest changes to the points above.]
+=======
+Okay, the plan is good now propose me SRS proposal
+>>>>>>> 0e6bd16a78aac4946cd0c565e423e05ebd8ab9b9

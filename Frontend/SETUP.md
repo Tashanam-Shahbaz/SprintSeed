@@ -16,6 +16,26 @@ pnpm run dev
 ### 3. Access the Application
 Open your browser and go to `http://localhost:5173`
 
+## API Configuration
+
+The application uses a centralized API configuration system located in `src/config/api.js`. To change the backend API URL, simply update the `BASE_URL` constant in that file:
+
+```javascript
+// src/config/api.js
+const BASE_URL = 'http://localhost:8000'; // Update this URL as needed
+```
+
+### Usage in Components
+
+All API calls use the centralized configuration:
+
+```javascript
+import { getApiUrl } from '../config/api';
+
+// Use the helper function to construct API URLs
+const response = await fetch(getApiUrl('endpoint'));
+```
+
 ## Development Workflow
 
 ### Running the Application

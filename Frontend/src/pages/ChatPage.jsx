@@ -14,6 +14,7 @@ import {
 import ChatArea from "../components/chat/ChatArea";
 import ChatInput from "../components/chat/ChatInput";
 import { toast } from 'react-toastify';
+import { getApiUrl } from '../config/api';
 
 const ChatPage = ({ user, onLogout, onSendEmail }) => {
   const [chats, setChats] = useState([]);
@@ -22,7 +23,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const res = await fetch("http://localhost:8000/fetch-user-chat-info", {
+        const res = await fetch(getApiUrl("fetch-user-chat-info"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -69,9 +70,9 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       // Generate unique project ID
       const projectId = `project-${Date.now()}`;
       const projectName = `Project ${chats.length + 1}`;
-      console.log(user)
+      
       // Create project via API
-      const response = await fetch('http://localhost:8000/create-project', {
+      const response = await fetch(getApiUrl('create-project'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,6 +104,10 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         projectId: returnedProjectId
       };
       setChats(prev => [...prev, newChat]);
+      
+      // Automatically select the new chat
+      handleChatSelect(returnedProjectId);
+      
     } catch (error) {
       console.error('Error creating project:', error);
       // Still add the chat locally even if API fails
@@ -114,6 +119,9 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
         projectId: fallbackProjectId
       };
       setChats(prev => [...prev, newChat]);
+      
+      // Automatically select the new chat
+      handleChatSelect(fallbackProjectId);
     }
   };
 
@@ -130,7 +138,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/fetch-user-chat-details", {
+      const res = await fetch(getApiUrl("fetch-user-chat-details"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -205,7 +213,7 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       }
 
       // Call the generate-srs-proposal API
-      const response = await fetch('http://localhost:8000/generate-srs-proposal', {
+      const response = await fetch(getApiUrl('generate-srs-proposal'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +231,6 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
           user_id: user?.user_id
         })
       });
-      console.log("Response:", response)
 
       if (!response.ok) {
         throw new Error('Failed to generate SRS proposal');
@@ -245,102 +252,62 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
       
       setMessages(prev => [...prev, aiMessage]);
 
-      // Handle streaming response
+      // Set up EventSource for SSE handling
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let accumulatedContent = "";
-      let buffer = "";
+      let fullContent = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-        
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-        
-        // Process complete lines from buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ""; // Keep incomplete line in buffer
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            // Extract content after "data: " prefix
-            const content = line.substring(6);
-            if (content.trim()) {
-              // Add the content directly
-              accumulatedContent += content;
+      try {
+        // Process the stream
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            break;
+          }
+          
+          // Decode the chunk
+          const chunk = decoder.decode(value, { stream: true });
+          
+          // Parse SSE format (data: content\n\n)
+          const lines = chunk.split("\n\n");
+          
+          for (const line of lines) {
+            if (line.trim().startsWith("data: ")) {
+              // Extract just the content part after "data: "
+              const content = line.trim().substring(6);
               
-              // Apply minimal formatting - just add line breaks for readability
-              let formattedContent = accumulatedContent;
-              
-              // Add line breaks before numbered lists
-              formattedContent = formattedContent.replace(/([.!?])\s*(\d+\.\s+[A-Z])/g, '$1\n\n$2');
-              
-              // Add line breaks before major sections (without adding markdown syntax)
-              formattedContent = formattedContent.replace(/([.!?])\s*(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)/g, '$1\n\n$2');
-              
-              // Add line breaks before STAGE headers (without adding markdown syntax)
-              formattedContent = formattedContent.replace(/([.!?])\s*(STAGE \d+:)/g, '$1\n\n$2');
-              
-              // Add proper spacing for bullet points
-              formattedContent = formattedContent.replace(/([.!?])\s*(-\s+)/g, '$1\n\n$2');
-              
-              // Clean up multiple line breaks
-              formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
-              formattedContent = formattedContent.replace(/^\n+/, '');
-              
-              // Update the AI message with formatted content
-              setMessages(prev => prev.map(msg => 
-                msg.id === aiMessageId 
-                  ? { ...msg, content: formattedContent }
-                  : msg
-              ));
+              if (content) {
+                // Add to the full content
+                fullContent += content;
+                
+                // Format the content with proper line breaks for SRS document structure
+                let formattedContent = formatSRSContent(fullContent);
+                
+                // Update the message with the latest content
+                setMessages(prev => 
+                  prev.map(msg => 
+                    msg.id === aiMessageId 
+                      ? { ...msg, content: formattedContent }
+                      : msg
+                  )
+                );
+              }
             }
           }
         }
-      }
-
-      // Process any remaining buffer content
-      if (buffer.startsWith('data: ')) {
-        const content = buffer.substring(6);
-        if (content.trim()) {
-          accumulatedContent += content;
-          
-          // Final formatting pass - just clean line breaks
-          let formattedContent = accumulatedContent;
-          
-          // Add line breaks before numbered lists
-          formattedContent = formattedContent.replace(/([.!?])\s*(\d+\.\s+[A-Z])/g, '$1\n\n$2');
-          
-          // Add line breaks before major sections (without markdown syntax)
-          formattedContent = formattedContent.replace(/([.!?])\s*(INTRODUCTION|FRONTEND SPECIFICATIONS|BACKEND ARCHITECTURE|DATABASE DESIGN|NON-FUNCTIONAL REQUIREMENTS|IMPLEMENTATION TIMELINE)/g, '$1\n\n$2');
-          
-          // Add line breaks before STAGE headers (without markdown syntax)
-          formattedContent = formattedContent.replace(/([.!?])\s*(STAGE \d+:)/g, '$1\n\n$2');
-          
-          // Add proper spacing for bullet points
-          formattedContent = formattedContent.replace(/([.!?])\s*(-\s+)/g, '$1\n\n$2');
-          
-          // Clean up multiple line breaks
-          formattedContent = formattedContent.replace(/\n{3,}/g, '\n\n');
-          formattedContent = formattedContent.replace(/^\n+/, '');
-          
-          setMessages(prev => prev.map(msg => 
+      } catch (streamError) {
+        console.error("Stream reading error:", streamError);
+      } finally {
+        // Mark streaming as complete
+        setMessages(prev => 
+          prev.map(msg => 
             msg.id === aiMessageId 
-              ? { ...msg, content: formattedContent }
+              ? { ...msg, isStreaming: false }
               : msg
-          ));
-        }
+          )
+        );
       }
-
-      // Mark streaming as complete
-      setMessages(prev => prev.map(msg => 
-        msg.id === aiMessageId 
-          ? { ...msg, isStreaming: false }
-          : msg
-      ));
-
     } catch (error) {
       console.error('Error generating SRS proposal:', error);
       
@@ -355,6 +322,43 @@ const ChatPage = ({ user, onLogout, onSendEmail }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to format SRS content with proper line breaks
+  const formatSRSContent = (text) => {
+    if (!text) return "";
+    
+    // Apply formatting rules in sequence
+    let formatted = text;
+    
+    // Add breaks before major section headers
+    const sectionHeaders = [
+      "INTRODUCTION", 
+      "FRONTEND SPECIFICATIONS", 
+      "BACKEND ARCHITECTURE", 
+      "DATABASE DESIGN", 
+      "NON-FUNCTIONAL REQUIREMENTS", 
+      "IMPLEMENTATION TIMELINE"
+    ];
+    
+    sectionHeaders.forEach(header => {
+      const headerRegex = new RegExp(`([.!?\\s])${header}`, 'g');
+      formatted = formatted.replace(headerRegex, `$1\n\n${header}`);
+    });
+    
+    // Add breaks before STAGE sections
+    // formatted = formatted.replace(/([.!?\s])(STAGE \d+:)/g, '$1\n\n$2');
+    
+    // // Add breaks before numbered lists
+    // formatted = formatted.replace(/(\d+\.\s+)([A-Z])/g, '\n$1$2');
+    
+    // // Add breaks before bullet points
+    // formatted = formatted.replace(/([.!?\s])(-\s+)/g, '$1\n\n$2');
+    
+    // Normalize multiple line breaks
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    
+    return formatted;
   };
 
   return (
