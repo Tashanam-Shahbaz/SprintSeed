@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { toast } from 'react-toastify';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
+import { getApiUrl } from '../../config/api';
 
 const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, selectedModel }) => {
   const [emailData, setEmailData] = useState({
@@ -26,7 +27,7 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
   const generateEmailSummary = useCallback(async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:8000/email-summary-generator', {
+      const response = await fetch(getApiUrl('email-summary-generator'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +122,7 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
         formData.append('attachment', attachment);
       }
       
-      const response = await fetch('http://localhost:8000/send-email', {
+      const response = await fetch(getApiUrl('send-email'), {
         method: 'POST',
         body: formData // Using FormData instead of JSON to support file uploads
       });
@@ -182,7 +183,7 @@ const EmailModal = ({ isOpen, onClose, onSend, projectId, conversationId, select
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-muted-foreground">Generating email summary...</span>
+                <span className="text-sm text-muted-foreground"></span>
               </div>
             </div>
           )}
