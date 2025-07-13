@@ -1,14 +1,23 @@
-# SprintSpeed
+# 🚀 SprintSpeed
 
-A collaborative AI-powered platform to streamline software development planning through intelligent agents.
+**AI-powered platform to streamline software planning — from requirement intake to executive-ready summaries.**
 
-## 🚀 Objective
+---
 
-SprintSpeed enables:
-- Users (e.g., BAs, Managers) to input requirements.
-- AI agents to convert user input into structured documents (SRS).
-- Automated ticket creation based on approved specs.
-- Smart task assignment to developers using availability, expertise, and priorities.
+## 🌍 Overview
+
+SprintSpeed is designed to automate and accelerate early-stage software planning. Traditionally, converting a CEO's idea into an actionable plan requires several cycles between the CEO, Business Analysts (BAs), and Project Managers — costing time, effort, and clarity.
+
+SprintSpeed reduces this friction by allowing users (e.g., stakeholders, managers, or clients) to upload a prompt or document. AI agents then:
+
+* Understand and translate the input into a structured **Software Requirements Specification (SRS)**.
+* Iterate with human feedback for refinements.
+* Generate actionable tasks and assign them to developers.
+* Email a final summary to stakeholders like the CEO.
+
+⚡ This system has the potential to **replace or assist BAs and PMs** in early planning, offering speed, consistency, and transparency across the team.
+
+---
 
 ## 🧠 Agent Flow
 
@@ -16,58 +25,26 @@ SprintSpeed enables:
 1. User submits requirement → (via prompt or document)
 
 2. ➤ SRSCreatorAgent
-   - Analyzes user input
-   - Generates SRS
-   - Supports iterative refinement (human feedback loop)
+   - Generates a detailed SRS
+   - Supports iterative feedback
+   - Finalizes the plan
 
-3. ➤ TaskCreatorAgent
-   - Parses approved SRS
-   - Creates technical tasks/tickets with labels, effort estimates
+3. ➤ SummaryAgent
+   - Prepares a concise business summary
+   - Emails it to the project stakeholder (e.g., CEO)
 
-4. ➤ TaskAssignerAgent
-   - Fetches developer metadata (availability, expertise, workload)
-   - Assigns tasks accordingly
-````
+4. (Planned) ➤ TaskCreatorAgent
+   - Breaks down SRS into technical tasks
 
-## 🧱 Core Entities
-
-* **User**
-* **Projects**
-* **Tasks**
-* **Team**
-* **Comments**
-* **Notifications**
-
-
-
-## 💡 Agent Component Comments (In-code Pseudocode Style)
-
-### 🧾 `SRSCreatorAgent`
-```python
-# Purpose: Converts user requirements into structured SRS
-# Workflow:
-#   1. Accepts streaming input (text/prompt/file)
-#   2. Generates draft SRS with functional and non-functional sections
-#   3. Iterates with human feedback
-#   4. Finalizes SRS for use by downstream agents
-````
-
-### 🧱 `TaskCreatorAgent`
-
-```python
-# Purpose: Breaks SRS into actionable tickets
-# Workflow:
-#   1. Parses finalized SRS
-#   2. Generates task tickets (title, description, estimate)
-#   3. Pushes to ticket DB or external tools (e.g., GitHub issues)
+5. (Planned) ➤ TaskAssignerAgent
+   - Assigns tasks based on developer availability and expertise
 ```
+![Alt text](images/flow_2.png)
+---
 
-### 🧠 `TaskAssignerAgent`
+## 🛣️ Future Enhancements
 
-```python
-# Purpose: Assigns tasks to developers based on intelligent criteria
-# Workflow:
-#   1. Reads user database (expertise, workload, availability)
-#   2. Applies task priority rules
-#   3. Assigns each task to the most suitable developer
-```
+* **Task Generation Agent**: Automate ticket creation with effort estimates and technical breakdown.
+* **Task Assignment Agent**: Assign tasks using intelligent matching with developer profiles.
+* **Multi-Round Human Review**: Optional feedback from PMs or clients at each stage.
+* **Third-party Integrations**: GitHub, Jira, Slack, etc.
