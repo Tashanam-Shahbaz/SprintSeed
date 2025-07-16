@@ -56,8 +56,6 @@ npm run dev
 
 Once running, go to the given localhost
 
-
-
 ## 🧠 Agent Flow
 
 ```text
@@ -86,4 +84,4 @@ Once running, go to the given localhost
 * **Task Generation Agent**: Automate ticket creation with effort estimates and technical breakdown.
 * **Task Assignment Agent**: Assign tasks using intelligent matching with developer profiles.
 * **Multi-Round Human Review**: Optional feedback from PMs or clients at each stage.
-* **Third-party Integrations**: GitHub, Jira, Slack, etc.
+* **Third-party Integrations**: GitHub, Jira, Slack, etc. 
