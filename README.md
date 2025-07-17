@@ -85,3 +85,10 @@ Once running, go to the given localhost
 * **Task Assignment Agent**: Assign tasks using intelligent matching with developer profiles.
 * **Multi-Round Human Review**: Optional feedback from PMs or clients at each stage.
 * **Third-party Integrations**: GitHub, Jira, Slack, etc. 
+
+## 👥 Contributors
+
+* [Tashanam Shahbaz](https://github.com/Tashanam-Shahbaz)
+* [Rameesha Khan](https://github.com/Rameeshakhan)
+* [Khadija](https://github.com/19khadij)
+* [Sabahat](https://github.com/Sabahatt)
